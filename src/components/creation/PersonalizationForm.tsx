@@ -6,10 +6,11 @@ import { ArrowRight } from "lucide-react";
 
 interface PersonalizationFormProps {
   goal: string;
+  onboardMsg: string;
   onSubmit: (details: string) => void;
 }
 
-export const PersonalizationForm = ({ goal, onSubmit }: PersonalizationFormProps) => {
+export const PersonalizationForm = ({ goal, onboardMsg, onSubmit }: PersonalizationFormProps) => {
   const [details, setDetails] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -28,7 +29,7 @@ export const PersonalizationForm = ({ goal, onSubmit }: PersonalizationFormProps
         <h1 className="text-3xl font-bold tracking-tight">Personnalise ton apprentissage</h1>
         <div className="space-y-3">
           <p className="text-lg text-muted-foreground">
-            Tu veux apprendre {goal}, c'est super ! Dis m'en plus sur tes objectifs
+            {onboardMsg}
           </p>
           <p className="text-base text-muted-foreground">
             Tu peux préciser ton niveau actuel, tes expériences passées, ou tes objectifs spécifiques pour personnaliser ton parcours d'apprentissage.

@@ -5,7 +5,7 @@ import { PersonalizationForm } from "@/components/creation/PersonalizationForm";
 import { PathView } from "@/components";
 import { generateTreeFromCourseData } from "@/lib/tree-generator";
 import { ProgressDots } from "@/components/ui/progress-dots";
-import { generatePlanningTree,sendCreateCourse } from "@/api/webhook";
+import { generatePlanningTree, sendCreateCourse, generateOnboarding } from "@/api/webhook";
 import { saveToLocalStorage } from "@/utils/localStorage";
 import LoadingBar from "@/components/ui/LoadingBar";
 
@@ -13,10 +13,13 @@ const Index = () => {
   const [stage, setStage] = useState<"creation" | "personalization" | "tree" | "loading">("creation");
   const [learningGoal, setLearningGoal] = useState<string>("");
   const [treeData, setTreeData] = useState<any>(null);
+  const [onboardingData, setOnboardingData] = useState<any>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>("Génération de votre parcours d'apprentissage...");
 
-  const handleCreatePath = (goal: string) => {
+  const handleCreatePath = async (goal: string) => {
     setLearningGoal(goal);
+    const onboardData = await generateOnboarding(goal);
+    setOnboardingData(onboardData);
     setStage("personalization");
   };
 
@@ -81,7 +84,7 @@ const Index = () => {
         transition={{ duration: 0.5 }}
       >
         {stage === "creation" && <LearningPathCreation onCreatePath={handleCreatePath} />}
-        {stage === "personalization" && <PersonalizationForm goal={learningGoal} onSubmit={handlePersonalization} />}
+        {stage === "personalization" && <PersonalizationForm goal={learningGoal} onboardMsg={onboardingData} onSubmit={handlePersonalization} />}
         {stage === "loading" && <LoadingBar message={loadingMessage} color="indigo" width={350} />}
         {stage === "tree" && <PathView learningGoal={learningGoal} treeData={treeData} />}
       </motion.div>
