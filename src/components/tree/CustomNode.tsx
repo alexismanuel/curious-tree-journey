@@ -4,14 +4,14 @@ import { Node } from "@/types/tree";
 export const CustomNode = ({ data }: { data: { node: Node, isSelected: boolean, onSelect: (node: Node) => void, style: { width: number, height: number, scale: number, primaryColor: string }, index: number } }) => {
   const { node, isSelected, onSelect, index } = data;
   const isEven = index % 2 === 0;
-  
+
   return (
-    <div 
+    <div
       className="relative group"
       onClick={() => onSelect(node)}
     >
       {/* Title */}
-      <div 
+      <div
         className={`absolute ${isEven ? 'right-full mr-3' : 'left-full ml-3'} top-1/2 -translate-y-1/2 text-sm font-medium whitespace-nowrap`}
       >
         {node.title}
@@ -24,11 +24,11 @@ export const CustomNode = ({ data }: { data: { node: Node, isSelected: boolean, 
           background: '#F0F0F0',
           border: '2px solid #000000',
         }}
-        whileHover={{ 
+        whileHover={{
           scale: 1.05,
           transition: { duration: 0.2 }
         }}
-        whileTap={{ 
+        whileTap={{
           scale: 0.95,
           transition: { duration: 0.1 }
         }}

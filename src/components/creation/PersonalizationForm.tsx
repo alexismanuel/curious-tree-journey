@@ -19,12 +19,12 @@ export const PersonalizationForm = ({ goal, onSubmit }: PersonalizationFormProps
 
   return (
     <motion.div
-      className="w-full max-w-lg mx-auto flex flex-col items-center gap-8"
+      className="w-full max-w-lg mx-auto my-auto flex flex-col items-center gap-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="flex flex-col items-center gap-6 text-center">
+      <div className="flex flex-col items-center gap-24 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Personnalise ton apprentissage</h1>
         <div className="space-y-3">
           <p className="text-lg text-muted-foreground">
@@ -37,15 +37,15 @@ export const PersonalizationForm = ({ goal, onSubmit }: PersonalizationFormProps
       </div>
 
       <form onSubmit={handleSubmit} className="w-full">
-        <div className="flex flex-col gap-4">
+        <div className="fixed bottom-0  px-4 pb-4 left-0 right-0 w-full flex flex-col gap-4">
           <div className="relative">
             <Input
               value={details}
               onChange={(e) => setDetails(e.target.value)}
               placeholder="Mes objectifs..."
-              className="h-14 px-4 text-lg ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="h-14 px-4 pr-12 text-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
-            <Button 
+            <Button
               type="submit"
               size="icon"
               variant="default"
