@@ -121,7 +121,8 @@
 
   /* Branch styles */
   .branch {
-    @apply stroke-bark-300 stroke-[3] stroke-dasharray-100 opacity-80;
+    @apply stroke-bark-300 stroke-[3] opacity-80;
+    stroke-dasharray: 100;
   }
   
   .branch-completed {
