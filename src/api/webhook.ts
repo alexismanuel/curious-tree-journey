@@ -85,7 +85,7 @@ async function sendCreateCourse(create_course: any): Promise<any> {
 
 async function chatWithAI(context : string, message: string): Promise<any> {
     try {
-        const response = await fetch('https://hook.eu1.make.com/ihmym1n82oq1hqb7sa83fa5n5mwa8v48', {
+        const response = await fetch('https://hook.eu1.make.com/mo2jx6wnssgv9nu4r3wqxx9t2molek13', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -99,7 +99,8 @@ async function chatWithAI(context : string, message: string): Promise<any> {
         }
 
         // Conversion de la réponse en JSON et retour
-        const data = await response.json();
+        const jsonResponse = await response.json();
+        const data = jsonResponse.reponse;
         console.log('Réponse du webhook:', data);
         return data;
     } catch (error) {
