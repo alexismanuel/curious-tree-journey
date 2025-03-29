@@ -30,27 +30,53 @@ async function generatePlanningTree(tree: string): Promise<any> {
  * @returns La réponse du webhook convertie en JSON.
  */
 async function sendCreateCourse(create_course: any): Promise<any> {
+    // Affichages de débogage détaillés
     console.log('Envoie de la requête');
+    console.log('Type de create_course:', typeof create_course);
+    
+    // Si c'est une chaîne, essayons de voir si c'est déjà du JSON
+    if (typeof create_course === 'string') {
+        console.log('create_course est une chaîne de caractères');
+        try {
+            // Vérifions si c'est du JSON valide
+            JSON.parse(create_course);
+            console.log('La chaîne est un JSON valide');
+        } catch (e) {
+            console.log('La chaîne n\'est PAS un JSON valide:', e.message);
+        }
+    }
+    
+    // Préparons le corps de la requête avec des logs
+    const requestBody = JSON.stringify({ course: create_course });
+    console.log('Corps de la requête:', requestBody);
+    
     try {
         const response = await fetch('https://hook.eu1.make.com/p7esqd79lmis8i55kpesi2fq6e4nkizy', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ course: create_course })
+            body: requestBody
         });
 
-        // Vérification du statut de la réponse
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP : statut ${response.status}`);
-        }
-
-        // On récupère le texte brut de la réponse
-        const responseText = await response.text();
-        console.log('Réponse du webhook:', responseText);
+        console.log('Statut de la réponse:', response.status);
         
-        // On retourne le texte tel quel
-        return responseText;
+        // On récupère d'abord le texte brut pour voir s'il y a un problème
+        const rawText = await response.text();
+        console.log('Réponse brute:', rawText);
+        
+        // Puis on essaie de le parser en JSON si possible
+        let data;
+        try {
+            data = JSON.parse(rawText);
+            console.log('Réponse JSON parsée:', data);
+        } catch (parseError) {
+            console.error('Impossible de parser la réponse en JSON:', parseError);
+            // On retourne quand même le texte brut
+            return rawText;
+        }
+        
+        return data;
     } catch (error) {
         console.error('Erreur lors de l\'appel du webhook:', error);
         throw error;
