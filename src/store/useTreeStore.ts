@@ -1,7 +1,7 @@
 
 import { create } from "zustand";
 import { TreeData, Node, NodeStatus } from "@/types/tree";
-import { supabase } from "@/integrations/supabase/client";
+import { createPath, fetchPath, updatePath } from "@/api/paths";
 
 interface TreeState {
   learningGoal: string;
@@ -120,20 +120,14 @@ export const useTreeStore = create<TreeState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
-      const { data, error } = await supabase
-        .from('learning_paths')
-        .select('*')
-        .eq('id', pathId)
-        .single();
-        
-      if (error) throw error;
+      const pathData = await fetchPath(pathId);
       
-      if (data) {
+      if (pathData) {
         set({
           currentPath: pathId,
-          learningGoal: data.goal,
-          treeData: data.tree_data,
-          activeNode: data.tree_data.rootNode,
+          learningGoal: pathData.goal,
+          treeData: pathData.tree_data,
+          activeNode: pathData.tree_data.rootNode,
         });
       }
     } catch (error) {
@@ -153,26 +147,16 @@ export const useTreeStore = create<TreeState>((set, get) => ({
       const { generateInitialTree } = await import('@/lib/tree-generator');
       const treeData = generateInitialTree(goal);
       
-      // Save to Supabase
-      const { data, error } = await supabase
-        .from('learning_paths')
-        .insert([{ 
-          goal, 
-          tree_data: treeData,
-          created_at: new Date().toISOString()
-        }])
-        .select('id')
-        .single();
-        
-      if (error) throw error;
+      // Save to localStorage through our mock implementation
+      const pathId = await createPath(goal, treeData);
       
       set({
-        currentPath: data.id,
+        currentPath: pathId,
         treeData,
         activeNode: treeData.rootNode
       });
       
-      return data.id;
+      return pathId;
     } catch (error) {
       console.error('Error creating path:', error);
       set({ error: 'Failed to create learning path' });
@@ -189,15 +173,7 @@ export const useTreeStore = create<TreeState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
-      const { error } = await supabase
-        .from('learning_paths')
-        .update({ 
-          tree_data: treeData,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', currentPath);
-        
-      if (error) throw error;
+      await updatePath(currentPath, treeData);
     } catch (error) {
       console.error('Error saving path:', error);
       set({ error: 'Failed to save learning path' });

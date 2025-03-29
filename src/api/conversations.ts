@@ -1,6 +1,5 @@
 
-import { supabase } from "@/integrations/supabase/client";
-
+// Mock implementation using localStorage instead of Supabase
 export type Message = {
   id: string;
   sender: "ai" | "user";
@@ -8,24 +7,43 @@ export type Message = {
   timestamp: string;
 };
 
+type Conversation = {
+  path_id: string;
+  node_id: string;
+  messages: Message[];
+  updated_at?: string;
+};
+
+// Helper function to get all conversations from local storage
+const getConversationsFromStorage = (): Conversation[] => {
+  try {
+    const conversations = localStorage.getItem('conversations');
+    return conversations ? JSON.parse(conversations) : [];
+  } catch (e) {
+    console.error('Error reading conversations from localStorage:', e);
+    return [];
+  }
+};
+
+// Helper function to save conversations to local storage
+const saveConversationsToStorage = (conversations: Conversation[]): void => {
+  try {
+    localStorage.setItem('conversations', JSON.stringify(conversations));
+  } catch (e) {
+    console.error('Error saving conversations to localStorage:', e);
+  }
+};
+
 export const fetchConversation = async (pathId: string, nodeId: string): Promise<Message[]> => {
-  const { data, error } = await supabase
-    .from('conversations')
-    .select('messages')
-    .eq('path_id', pathId)
-    .eq('node_id', nodeId)
-    .single();
+  try {
+    const conversations = getConversationsFromStorage();
+    const conversation = conversations.find(c => c.path_id === pathId && c.node_id === nodeId);
     
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // No conversation found for this node, return empty array
-      return [];
-    }
+    return conversation?.messages || [];
+  } catch (error) {
     console.error('Error fetching conversation:', error);
     throw new Error('Failed to fetch conversation');
   }
-  
-  return data?.messages || [];
 };
 
 export const saveMessage = async (
@@ -33,55 +51,38 @@ export const saveMessage = async (
   nodeId: string, 
   message: Omit<Message, 'id'>
 ): Promise<Message> => {
-  // First check if a conversation exists
-  const { data: existingConversation, error: checkError } = await supabase
-    .from('conversations')
-    .select('id, messages')
-    .eq('path_id', pathId)
-    .eq('node_id', nodeId)
-    .single();
+  try {
+    const conversations = getConversationsFromStorage();
+    const conversationIndex = conversations.findIndex(c => c.path_id === pathId && c.node_id === nodeId);
     
-  const newMessage = {
-    ...message,
-    id: Date.now().toString(),
-  };
-  
-  if (checkError && checkError.code === 'PGRST116') {
-    // No conversation found, create a new one
-    const { error: insertError } = await supabase
-      .from('conversations')
-      .insert([{
+    const newMessage = {
+      ...message,
+      id: Date.now().toString(),
+    };
+    
+    if (conversationIndex === -1) {
+      // No conversation found, create a new one
+      conversations.push({
         path_id: pathId,
         node_id: nodeId,
         messages: [newMessage],
-      }]);
-      
-    if (insertError) {
-      console.error('Error creating conversation:', insertError);
-      throw new Error('Failed to save message');
-    }
-  } else if (checkError) {
-    console.error('Error checking for conversation:', checkError);
-    throw new Error('Failed to save message');
-  } else {
-    // Update existing conversation
-    const updatedMessages = [...(existingConversation?.messages || []), newMessage];
-    
-    const { error: updateError } = await supabase
-      .from('conversations')
-      .update({ 
-        messages: updatedMessages,
         updated_at: new Date().toISOString()
-      })
-      .eq('id', existingConversation?.id);
-      
-    if (updateError) {
-      console.error('Error updating conversation:', updateError);
-      throw new Error('Failed to save message');
+      });
+    } else {
+      // Update existing conversation
+      conversations[conversationIndex] = {
+        ...conversations[conversationIndex],
+        messages: [...conversations[conversationIndex].messages, newMessage],
+        updated_at: new Date().toISOString()
+      };
     }
+    
+    saveConversationsToStorage(conversations);
+    return newMessage;
+  } catch (error) {
+    console.error('Error saving message:', error);
+    throw new Error('Failed to save message');
   }
-  
-  return newMessage;
 };
 
 export const generateAIResponse = async (
