@@ -1,5 +1,5 @@
 
-import { Node, Message } from "@/components/LearningTree";
+import { Node, Message } from "@/types/tree";
 
 // Generate initial conversation messages based on the node
 export const generateInitialMessages = (node: Node): Message[] => {

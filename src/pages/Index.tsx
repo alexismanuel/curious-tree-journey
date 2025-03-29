@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import WelcomeScreen from "@/components/welcome/WelcomeScreen";
 import LearningPathCreation from "@/components/creation/LearningPathCreation";
-import { PathView } from "@/components/LearningTree";
+import { PathView } from "@/components";
 import { generateInitialTree } from "@/lib/tree-generator";
 
 const Index = () => {
