@@ -33,7 +33,7 @@ export const CustomNode = ({ data }: { data: { node: Node, isSelected: boolean, 
   
   return (
     <motion.div
-      className={`relative flex flex-col p-4 bg-white border border-gray-200 ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+      className={`relative flex flex-col p-3 sm:p-4 bg-white border border-gray-200 ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
       style={{ 
         width: `${style.width}px`,
         height: `${style.height}px`,
@@ -50,26 +50,10 @@ export const CustomNode = ({ data }: { data: { node: Node, isSelected: boolean, 
         transition: { duration: 0.1 }
       }}
     >
-      <div className="flex flex-col gap-2 w-full">
-        <div className="flex items-center gap-2">
-          <span className={`font-semibold ${statusStyles.textColor} text-base`}>
-            {node.title}
-          </span>
-        </div>
-        {node.description && (
-          <p className="text-gray-500 text-sm line-clamp-2">
-            {node.description}
-          </p>
-        )}
-        {node.tags && node.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-1">
-            {node.tags.map((tag, index) => (
-              <span key={index} className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+      <div className="flex items-center justify-center w-full h-full">
+        <span className={`font-semibold ${statusStyles.textColor} text-sm sm:text-base text-center`}>
+          {node.title}
+        </span>
       </div>
     </motion.div>
   );

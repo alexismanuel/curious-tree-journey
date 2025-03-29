@@ -33,7 +33,7 @@ export const TreeVisualization = ({
     const isTablet = screenWidth >= 640 && screenWidth < 1024;
     
     // Adjust spacing based on device size
-    const verticalSpacing = isMobile ? 120 : isTablet ? 140 : 160;
+    const verticalSpacing = isMobile ? 60 : isTablet ? 80 : 100;
     
     // Calculate positions for vertical line layout
     const x = screenWidth / 2; // Center horizontally
@@ -42,12 +42,14 @@ export const TreeVisualization = ({
     
     // Calculate node size and color based on level
     const getNodeStyle = (level: number) => {
-      const baseSize = { width: 280, height: 80 };
+      const baseSize = isMobile 
+        ? { width: 160, height: 40 }
+        : { width: 200, height: 48 };
       
       return {
         width: baseSize.width,
         height: baseSize.height,
-        scale: 1,
+        scale: isMobile ? 0.9 : 1,
         primaryColor: '#FFFFFF'
       };
     };
