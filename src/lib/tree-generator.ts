@@ -1,5 +1,5 @@
 
-import { TreeData, Node } from "@/utils/api";
+import { Node, TreeData } from "@/components/LearningTree";
 
 // Generate a sample tree structure based on the learning goal
 export const generateInitialTree = (goal: string): TreeData => {

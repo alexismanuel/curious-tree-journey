@@ -1,5 +1,5 @@
 
-import { Node, Message } from "@/utils/api";
+import { Node, Message } from "@/components/LearningTree";
 
 // Generate initial conversation messages based on the node
 export const generateInitialMessages = (node: Node): Message[] => {

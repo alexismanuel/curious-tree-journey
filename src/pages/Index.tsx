@@ -1,40 +1,29 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useLocation, useNavigate } from "react-router-dom";
 import WelcomeScreen from "@/components/welcome/WelcomeScreen";
 import LearningPathCreation from "@/components/creation/LearningPathCreation";
-import { useTreeStore } from "@/utils/api";
 import { PathView } from "@/components/LearningTree";
+import { generateInitialTree } from "@/lib/tree-generator";
 
 const Index = () => {
   const [stage, setStage] = useState<"welcome" | "creation" | "tree">("welcome");
-  const { learningGoal, setLearningGoal, createPath } = useTreeStore();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  // Handle redirect with state from other pages
-  if (location.state?.learningGoal) {
-    setLearningGoal(location.state.learningGoal);
-    setStage("creation");
-  }
+  const [learningGoal, setLearningGoal] = useState<string>("");
+  const [treeData, setTreeData] = useState<any>(null);
 
   const handleGetStarted = () => {
     setStage("creation");
   };
 
-  const handleCreatePath = async (goal: string) => {
+  const handleCreatePath = (goal: string) => {
     setLearningGoal(goal);
     
-    // For demo, we'll create a path locally and then show it
-    // Before redirecting to the full path view
-    const pathId = await createPath(goal);
+    // Generate a tree locally without persisting
+    const initialTree = generateInitialTree(goal);
+    setTreeData(initialTree);
     
-    if (pathId) {
-      navigate(`/path/${pathId}`);
-    } else {
-      setStage("tree");
-    }
+    // Show the tree visualization
+    setStage("tree");
   };
 
   return (
@@ -62,7 +51,7 @@ const Index = () => {
       >
         {stage === "welcome" && <WelcomeScreen onGetStarted={handleGetStarted} />}
         {stage === "creation" && <LearningPathCreation onCreatePath={handleCreatePath} />}
-        {stage === "tree" && <PathView />}
+        {stage === "tree" && <PathView learningGoal={learningGoal} treeData={treeData} />}
       </motion.div>
     </div>
   );

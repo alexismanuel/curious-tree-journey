@@ -1,6 +1,5 @@
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ReactFlow, 
@@ -8,9 +7,7 @@ import {
   Controls,
   useNodesState, 
   useEdgesState,
-  MarkerType,
-  Node as FlowNode,
-  Edge
+  MarkerType
 } from "@xyflow/react";
 import '@xyflow/react/dist/style.css';
 import { useToast } from "@/hooks/use-toast";
@@ -22,26 +19,36 @@ import {
   Check, 
   Lock, 
   ChevronRight, 
-  ArrowLeft, 
   Loader2, 
   Home, 
-  Save, 
-  Share, 
-  Send, 
-  RotateCcw, 
   CheckCircle, 
   BookOpen,
   Sparkles,
-  User
+  User,
+  Send
 } from "lucide-react";
+import { generateInitialMessages } from "@/lib/conversation-generator";
 
-import { 
-  useTreeStore, 
-  Node as TreeNode, 
-  NodeStatus, 
-  Message,
-  useConversation
-} from "@/utils/api";
+// Types
+interface Node {
+  id: string;
+  title: string;
+  description: string;
+  status: "active" | "completed" | "upcoming" | "locked";
+  children: Node[];
+}
+
+interface TreeData {
+  rootNode: Node;
+  nodes: Node[];
+}
+
+interface Message {
+  id: string;
+  sender: "ai" | "user";
+  content: string;
+  timestamp: string;
+}
 
 // Progress Indicator Component
 const ProgressIndicator = ({ completed, total }: { completed: number; total: number }) => {
@@ -92,43 +99,26 @@ const ChatMessage = ({ message }: { message: Message }) => {
 };
 
 // Conversation Panel Component
-const ConversationPanel = ({ node, onComplete }: { node: TreeNode; onComplete: () => void }) => {
+const ConversationPanel = ({ node, onComplete }: { node: Node; onComplete: () => void }) => {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [progress, setProgress] = useState(node.status === "completed" ? 100 : 0);
+  const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { currentPath } = useTreeStore();
   const { toast } = useToast();
-  const { messages, isLoading, error, sendMessage } = useConversation(
-    currentPath || "", 
-    node?.id || ""
-  );
 
   useEffect(() => {
-    // Generate initial message if none exists
-    const createInitialMessage = async () => {
-      if (messages.length === 0 && currentPath && node) {
-        setIsTyping(true);
-        try {
-          await sendMessage(`Let's explore the concept of "${node.title}". ${node.description}. What would you like to know about this topic?`);
-        } catch (error) {
-          console.error('Error creating initial message:', error);
-        } finally {
-          setIsTyping(false);
-        }
-      }
-    };
+    // Generate initial message
+    const initialMessages = generateInitialMessages(node);
+    setMessages(initialMessages);
     
-    createInitialMessage();
-    
-    // Update progress based on message count
-    if (node.status !== "completed") {
-      const progress = Math.min(100, messages.length * 15);
-      setProgress(progress);
-    } else {
+    // Update progress based on node status
+    if (node.status === "completed") {
       setProgress(100);
+    } else {
+      setProgress(20);
     }
-  }, [node, messages.length, currentPath]);
+  }, [node]);
 
   useEffect(() => {
     // Scroll to bottom when messages change
@@ -136,34 +126,37 @@ const ConversationPanel = ({ node, onComplete }: { node: TreeNode; onComplete: (
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!input.trim() || !currentPath) return;
+    if (!input.trim()) return;
     
-    try {
-      setIsTyping(true);
-      await sendMessage(input);
-      setInput("");
+    // Add user message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      sender: "user",
+      content: input,
+      timestamp: new Date().toISOString()
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    setInput("");
+    setIsTyping(true);
+    
+    // Simulate AI thinking
+    setTimeout(() => {
+      // Add AI response
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "ai",
+        content: `I'm learning more about "${node.title}" too! That's an interesting question about ${input.substring(0, 30)}... Let me explain more about this concept.`,
+        timestamp: new Date().toISOString()
+      };
+      
+      setMessages(prev => [...prev, aiMessage]);
+      setIsTyping(false);
       
       // Update progress
-      setProgress(prev => Math.min(100, prev + 15));
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send message",
-        variant: "destructive"
-      });
-    } finally {
-      setIsTyping(false);
-    }
+      setProgress(prev => Math.min(100, prev + 20));
+    }, 1500);
   };
-
-  if (isLoading && messages.length === 0) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 text-primary animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col h-full">
@@ -231,10 +224,6 @@ const ConversationPanel = ({ node, onComplete }: { node: TreeNode; onComplete: (
             You've completed this learning node and unlocked new content
           </p>
           <div className="flex justify-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setProgress(0)}>
-              <RotateCcw className="h-4 w-4 mr-1" />
-              Review Again
-            </Button>
             <Button 
               size="sm" 
               className="bg-leaf-500 hover:bg-leaf-600 text-white"
@@ -272,7 +261,7 @@ const ConversationPanel = ({ node, onComplete }: { node: TreeNode; onComplete: (
 };
 
 // Custom Node Component for ReactFlow
-const CustomNode = ({ data }: { data: { node: TreeNode, isSelected: boolean, onSelect: (node: TreeNode) => void } }) => {
+const CustomNode = ({ data }: { data: { node: Node, isSelected: boolean, onSelect: (node: Node) => void } }) => {
   const { node, isSelected, onSelect } = data;
   
   let statusClass = "node-upcoming";
@@ -316,9 +305,9 @@ const TreeVisualization = ({
   selectedNode, 
   onNodeSelect 
 }: { 
-  treeData: import("@/utils/api").TreeData;
-  selectedNode: import("@/utils/api").Node | null;
-  onNodeSelect: (node: import("@/utils/api").Node) => void;
+  treeData: TreeData;
+  selectedNode: Node | null;
+  onNodeSelect: (node: Node) => void;
 }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -328,11 +317,11 @@ const TreeVisualization = ({
   useEffect(() => {
     if (!treeData) return;
     
-    const flowNodes: FlowNode[] = [];
-    const flowEdges: Edge[] = [];
+    const flowNodes: any[] = [];
+    const flowEdges: any[] = [];
     
     // Recursive function to process tree nodes
-    const processNode = (node: TreeNode, level: number, index: number, parentId?: string) => {
+    const processNode = (node: Node, level: number, index: number, parentId?: string) => {
       // Calculate position
       const x = 150 + level * 200;
       const y = 100 + index * 120;
@@ -405,20 +394,18 @@ const TreeVisualization = ({
 };
 
 // Main Tree View Component
-const MainTreeView = ({ learningGoal }: { learningGoal: string }) => {
-  const { 
-    treeData, 
-    activeNode, 
-    isLoading, 
-    setActiveNode, 
-    completeNode,
-    savePath,
-    currentPath
-  } = useTreeStore();
+const MainTreeView = ({ learningGoal, treeData }: { learningGoal: string; treeData: TreeData }) => {
+  const [activeNode, setActiveNode] = useState<Node | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
-  const handleNodeSelect = (node: TreeNode) => {
+  // Set initial active node when tree data changes
+  useEffect(() => {
+    if (treeData && treeData.rootNode) {
+      setActiveNode(treeData.rootNode);
+    }
+  }, [treeData]);
+
+  const handleNodeSelect = (node: Node) => {
     if (node.status === "locked") {
       toast({
         title: "Node Locked",
@@ -432,49 +419,79 @@ const MainTreeView = ({ learningGoal }: { learningGoal: string }) => {
   };
 
   const handleCompleteNode = () => {
-    if (!activeNode) return;
+    if (!activeNode || !treeData) return;
     
-    completeNode(activeNode.id);
+    // Find the node and update its status
+    const updateNodeStatus = (node: Node): Node => {
+      if (node.id === activeNode.id) {
+        // Mark this node as completed
+        const updatedNode = { ...node, status: "completed" as const };
+        
+        // Unlock the next level of children if they exist
+        if (node.children && node.children.length > 0) {
+          updatedNode.children = node.children.map(child => ({
+            ...child,
+            status: child.status === "locked" ? "upcoming" as const : child.status
+          }));
+        }
+        
+        return updatedNode;
+      } else if (node.children && node.children.length > 0) {
+        // Recursively update children
+        return {
+          ...node,
+          children: node.children.map(updateNodeStatus)
+        };
+      }
+      
+      return node;
+    };
+    
+    // Create updated tree data
+    const updatedRootNode = updateNodeStatus(treeData.rootNode);
+    const updatedTreeData = {
+      ...treeData,
+      rootNode: updatedRootNode,
+      nodes: [
+        updatedRootNode,
+        ...collectAllNodes(updatedRootNode)
+      ]
+    };
+    
+    // Find next uncompleted node
+    const allNodes = collectAllNodes(updatedRootNode);
+    const nextNode = allNodes.find(n => n.status === "upcoming" || n.status === "active");
+    
+    if (nextNode) {
+      // Activate next node
+      nextNode.status = "active";
+      setActiveNode(nextNode);
+    }
     
     toast({
       title: "Node Completed! 🎉",
       description: "Great job! You've mastered this concept.",
     });
   };
-
-  const handleSave = async () => {
-    try {
-      await savePath();
-      toast({
-        title: "Progress saved",
-        description: "Your learning progress has been saved",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save progress",
-        variant: "destructive",
-      });
+  
+  // Helper function to collect all nodes
+  const collectAllNodes = (rootNode: Node): Node[] => {
+    let nodes: Node[] = [];
+    
+    if (rootNode.children && rootNode.children.length > 0) {
+      for (const child of rootNode.children) {
+        nodes.push(child);
+        nodes = nodes.concat(collectAllNodes(child));
+      }
     }
+    
+    return nodes;
   };
 
-  if (isLoading) {
+  if (!treeData) {
     return (
       <div className="h-full w-full flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center"
-        >
-          <div className="mb-4 relative">
-            <motion.div
-              className="w-16 h-16 rounded-full border-4 border-leaf-200 border-t-leaf-500"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-            />
-          </div>
-          <p className="text-muted-foreground">Creating your personalized learning path...</p>
-        </motion.div>
+        <Loader2 className="h-12 w-12 text-leaf-500 animate-spin" />
       </div>
     );
   }
@@ -491,30 +508,20 @@ const MainTreeView = ({ learningGoal }: { learningGoal: string }) => {
             variant="ghost" 
             size="sm" 
             className="mr-2"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => window.location.href = "/"}
           >
             <Home className="h-4 w-4 mr-2" />
-            Dashboard
+            Home
           </Button>
           <div className="text-muted-foreground">
             /<span className="ml-2 font-medium text-foreground">{learningGoal}</span>
           </div>
         </div>
         
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleSave}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Save
-          </Button>
-          <Button variant="outline" size="sm">
-            <Share className="h-4 w-4 mr-2" />
-            Share
-          </Button>
-        </div>
+        <ProgressIndicator 
+          completed={treeData.nodes.filter(n => n.status === "completed").length}
+          total={treeData.nodes.length}
+        />
       </motion.div>
       
       <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4">
@@ -528,10 +535,6 @@ const MainTreeView = ({ learningGoal }: { learningGoal: string }) => {
             <h2 className="text-xl font-bold text-bark-900">
               Your Learning Path
             </h2>
-            <ProgressIndicator 
-              completed={treeData?.nodes.filter(n => n.status === "completed").length || 0}
-              total={treeData?.nodes.length || 0}
-            />
           </div>
           
           <div className="flex-1 relative overflow-hidden">
@@ -566,67 +569,11 @@ const MainTreeView = ({ learningGoal }: { learningGoal: string }) => {
   );
 };
 
-// Path View Component (main page)
-const PathView = () => {
-  const { pathId } = useParams<{ pathId: string }>();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  const {
-    learningGoal,
-    treeData,
-    isLoading,
-    error,
-    fetchPath
-  } = useTreeStore();
-
-  useEffect(() => {
-    if (pathId) {
-      fetchPath(pathId);
-    }
-  }, [pathId, fetchPath]);
-
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Error",
-        description: error,
-        variant: "destructive",
-      });
-    }
-  }, [error, toast]);
-
-  if (isLoading) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 text-leaf-500 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your learning path...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!treeData) {
-    return (
-      <div className="h-screen w-full flex flex-col items-center justify-center">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold mb-2">Path Not Found</h1>
-          <p className="text-muted-foreground">
-            We couldn't find the learning path you're looking for.
-          </p>
-        </div>
-        <Button onClick={() => navigate('/dashboard')}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </Button>
-      </div>
-    );
-  }
-
+// Path View Component (public interface)
+const PathView = ({ learningGoal, treeData }: { learningGoal: string; treeData: TreeData }) => {
   return (
-    <div className="h-screen w-full">
-      <MainTreeView learningGoal={learningGoal} />
+    <div className="h-full min-h-[600px] w-full">
+      <MainTreeView learningGoal={learningGoal} treeData={treeData} />
     </div>
   );
 };
