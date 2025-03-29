@@ -1,17 +1,14 @@
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect} from "react";
 import { motion } from "framer-motion";
-import { TreeData, Node as TreeNode, NodeStatus } from "@/types/tree";
+import { TreeData, Node as TreeNode} from "@/types/tree";
 import { 
   ReactFlow, 
   Background, 
   Controls, 
-  MiniMap,
   useNodesState, 
   useEdgesState, 
-  addEdge,
   MarkerType,
-  Position,
   Node,
   Edge,
   ConnectionLineType
@@ -55,7 +52,7 @@ const CustomNode = ({ data }: { data: { node: TreeNode, isSelected: boolean, onS
       whileTap={{ scale: 0.95 }}
     >
       {statusIcon}
-      <div className="absolute top-16 w-40 text-center" style={{ left: '-35px' }}>
+      <div className="absolute top-12 w-40 text-center" style={{ left: '-55px' }}>
         <span className={`text-xs font-medium ${isSelected || node.status === "completed" ? 'opacity-100' : 'opacity-70'}`}>
           {node.title}
         </span>

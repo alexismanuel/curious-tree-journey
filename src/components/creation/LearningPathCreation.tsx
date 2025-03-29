@@ -3,7 +3,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Search, Sparkles, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -44,6 +43,20 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
       setIsCreating(false);
       onCreatePath(goal);
     }, 2000);
+  };
+
+  const courseData = {
+    "type": "Cours",
+    "nom": "Introduction à React",
+    "contexte": "Ce cours présente les fondamentaux de React",
+    "chapitres": [
+      {
+        "nom": "Les composants React",
+        "contexte": "Introduction aux composants",
+        "contenu": "..."
+      },
+      // Autres chapitres...
+    ]
   };
 
   return (

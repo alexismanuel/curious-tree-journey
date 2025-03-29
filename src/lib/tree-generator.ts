@@ -66,6 +66,44 @@ export const generateInitialTree = (goal: string): TreeData => {
     ]
   };
   
+ const courseNode: Node = {
+  "id": "guitare-essentiel",
+  "title": "Apprendre les bases essentielles de la guitare",
+  "description": "Un parcours court pour apprendre les bases indispensables de la guitare et commencer à jouer ses premiers morceaux.",
+  "niveau": "Débutant",
+  "chapters": [
+    {
+      "id": "c1",
+      "title": "Tenue et posture avec la guitare",
+      "prerequisites": []
+    },
+    {
+      "id": "c2",
+      "title": "Accorder sa guitare à l’oreille ou avec un accordeur",
+      "prerequisites": ["c1"]
+    },
+    {
+      "id": "c3",
+      "title": "Lire une tablature",
+      "prerequisites": ["c2"]
+    },
+    {
+      "id": "c4",
+      "title": "Jouer les accords de base (Em, Am, C, G)",
+      "prerequisites": ["c2"]
+    },
+    {
+      "id": "c5",
+      "title": "Faire des enchaînements rythmiques simples",
+      "prerequisites": ["c3", "c4"]
+    },
+    {
+      "id": "c6",
+      "title": "Premier morceau à 3 accords",
+      "prerequisites": ["c5"]
+    }
+  ]
+};
   return {
     rootNode,
     nodes: [

@@ -7,6 +7,7 @@ export interface Node {
   description: string;
   status: NodeStatus;
   children: Node[];
+  niveau: string;
 }
 
 export interface TreeData {
