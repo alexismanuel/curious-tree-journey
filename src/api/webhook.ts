@@ -30,4 +30,29 @@ async function sendCreateCourse(create_course: string): Promise<any> {
     }
 }
 
-export default sendCreateCourse;
+async function chatWithAI(context : string, message: string): Promise<any> {
+    try {
+        const response = await fetch('https://hook.eu1.make.com/ihmym1n82oq1hqb7sa83fa5n5mwa8v48', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ context, message })
+        });
+
+        // Vérification du statut de la réponse
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP : statut ${response.status}`);
+        }
+
+        // Conversion de la réponse en JSON et retour
+        const data = await response.json();
+        console.log('Réponse du webhook:', data);
+        return data;
+    } catch (error) {
+        console.error('Erreur lors de l\'appel du webhook:', error);
+        throw error;
+    }
+}
+
+export { sendCreateCourse, chatWithAI };
