@@ -69,7 +69,7 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
           nodes: updateNodeStatus(prev.nodes),
           rootNode: prev.rootNode.id === node.id 
             ? { ...prev.rootNode, status: "active" } 
-            : prev.rootNode
+            : { ...prev.rootNode, children: updateNodeStatus(prev.rootNode.children) }
         };
       });
     }
@@ -108,12 +108,14 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
         });
       };
       
+      const updatedRootNode = prev.rootNode.id === selectedNode.id 
+        ? { ...prev.rootNode, status: "completed" } 
+        : { ...prev.rootNode, children: updateNodeStatus(prev.rootNode.children) };
+      
       return {
         ...prev,
         nodes: updateNodeStatus(prev.nodes),
-        rootNode: prev.rootNode.id === selectedNode.id 
-          ? { ...prev.rootNode, status: "completed" } 
-          : prev.rootNode
+        rootNode: updatedRootNode
       };
     });
     
@@ -190,7 +192,7 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
             />
           </div>
           
-          <div className="flex-1 relative overflow-hidden p-4">
+          <div className="flex-1 relative overflow-hidden">
             {treeData && (
               <TreeVisualization 
                 treeData={treeData} 

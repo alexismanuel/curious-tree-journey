@@ -1,127 +1,163 @@
 
-import { useRef, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { TreeData, Node } from "@/types/tree";
+import { TreeData, Node as TreeNode, NodeStatus } from "@/types/tree";
+import { 
+  ReactFlow, 
+  Background, 
+  Controls, 
+  MiniMap,
+  useNodesState, 
+  useEdgesState, 
+  addEdge,
+  MarkerType,
+  Position,
+  Node,
+  Edge,
+  ConnectionLineType
+} from "@xyflow/react";
+import '@xyflow/react/dist/style.css';
 import { Check, Lock, ChevronRight } from "lucide-react";
 
 interface TreeVisualizationProps {
   treeData: TreeData;
-  selectedNode: Node | null;
-  onNodeSelect: (node: Node) => void;
+  selectedNode: TreeNode | null;
+  onNodeSelect: (node: TreeNode) => void;
 }
+
+// Custom node renderer component
+const CustomNode = ({ data }: { data: { node: TreeNode, isSelected: boolean, onSelect: (node: TreeNode) => void } }) => {
+  const { node, isSelected, onSelect } = data;
+  
+  let statusClass = "node-upcoming";
+  let statusIcon = <ChevronRight className="h-4 w-4" />;
+  
+  if (node.status === "completed") {
+    statusClass = "node-completed";
+    statusIcon = <Check className="h-4 w-4" />;
+  } else if (node.status === "active") {
+    statusClass = "node-active";
+    statusIcon = <ChevronRight className="h-4 w-4" />;
+  } else if (node.status === "locked") {
+    statusClass = "node-locked";
+    statusIcon = <Lock className="h-4 w-4" />;
+  }
+  
+  return (
+    <motion.div
+      className={`node ${statusClass} w-12 h-12 cursor-pointer`}
+      style={{ 
+        width: isSelected ? '60px' : '48px', 
+        height: isSelected ? '60px' : '48px'
+      }}
+      onClick={() => onSelect(node)}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {statusIcon}
+      <div className="absolute top-16 w-40 text-center" style={{ left: '-35px' }}>
+        <span className={`text-xs font-medium ${isSelected || node.status === "completed" ? 'opacity-100' : 'opacity-70'}`}>
+          {node.title}
+        </span>
+      </div>
+    </motion.div>
+  );
+};
+
+const nodeTypes = {
+  customNode: CustomNode,
+};
 
 const TreeVisualization = ({ 
   treeData, 
   selectedNode, 
   onNodeSelect 
 }: TreeVisualizationProps) => {
-  const svgRef = useRef<SVGSVGElement>(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   
-  // Calculate tree layout and render nodes and branches
+  // Convert tree data to react-flow nodes and edges
   useEffect(() => {
-    if (!svgRef.current) return;
+    if (!treeData) return;
     
-    // In a real implementation, this would use D3.js or a similar library
-    // to calculate the positions of nodes based on the tree structure
-  }, [treeData, svgRef]);
-
-  // Render a node
-  const renderNode = (node: Node, index: number, level: number) => {
-    // Calculate position based on level and index
-    // In a real implementation, these calculations would be more sophisticated
-    const x = 120 + level * 160;
-    const y = 100 + index * 100;
+    const flowNodes: Node[] = [];
+    const flowEdges: Edge[] = [];
     
-    let statusClass = "node-upcoming";
-    let statusIcon = <ChevronRight className="h-4 w-4" />;
+    // Recursive function to process tree nodes
+    const processNode = (node: TreeNode, level: number, index: number, parentId?: string) => {
+      // Calculate position
+      const x = 150 + level * 200;
+      const y = 100 + index * 120;
+      
+      // Create react-flow node
+      flowNodes.push({
+        id: node.id,
+        type: 'customNode',
+        position: { x, y },
+        data: {
+          node,
+          isSelected: selectedNode?.id === node.id,
+          onSelect: onNodeSelect
+        }
+      });
+      
+      // Create edge from parent to this node
+      if (parentId) {
+        flowEdges.push({
+          id: `e-${parentId}-${node.id}`,
+          source: parentId,
+          target: node.id,
+          className: `branch ${node.status === "completed" ? "branch-completed" : ""}`,
+          type: 'smoothstep',
+          animated: node.status === "active",
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 15,
+            height: 15,
+            color: node.status === "completed" ? '#84CAAA' : '#A18D7D',
+          },
+        });
+      }
+      
+      // Process children
+      if (node.children) {
+        node.children.forEach((child, childIndex) => {
+          processNode(child, level + 1, index + childIndex * 0.6, node.id);
+        });
+      }
+    };
     
-    if (node.status === "completed") {
-      statusClass = "node-completed";
-      statusIcon = <Check className="h-4 w-4" />;
-    } else if (node.status === "active") {
-      statusClass = "node-active";
-      statusIcon = <ChevronRight className="h-4 w-4" />;
-    } else if (node.status === "locked") {
-      statusClass = "node-locked";
-      statusIcon = <Lock className="h-4 w-4" />;
-    }
+    // Start processing from root node
+    processNode(treeData.rootNode, 0, 0);
     
-    const isSelected = selectedNode?.id === node.id;
-    
-    return (
-      <motion.g
-        key={node.id}
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3, delay: level * 0.1 + index * 0.05 }}
-      >
-        {/* Branches connecting to children */}
-        {node.children?.map((child, childIndex) => {
-          const childX = 120 + (level + 1) * 160;
-          const childY = 100 + (index + childIndex) * 100;
-          
-          return (
-            <motion.path
-              key={`${node.id}-${child.id}`}
-              d={`M ${x + 25} ${y} C ${x + 80} ${y}, ${childX - 30} ${childY}, ${childX - 25} ${childY}`}
-              fill="none"
-              className={`branch ${node.status === "completed" ? "branch-completed" : ""}`}
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.8, delay: level * 0.2 }}
-            />
-          );
-        })}
-        
-        {/* Node circle */}
-        <motion.circle
-          cx={x}
-          cy={y}
-          r={isSelected ? 30 : 24}
-          className={`${statusClass} cursor-pointer transition-all duration-300`}
-          onClick={() => onNodeSelect(node)}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          animate={isSelected ? { boxShadow: "0 0 0 4px rgba(102, 189, 149, 0.3)" } : {}}
-        />
-        
-        {/* Node icon */}
-        <g transform={`translate(${x - 8}, ${y - 8})`}>
-          {statusIcon}
-        </g>
-        
-        {/* Node title - shown if selected or completed */}
-        <motion.text
-          x={x}
-          y={y + 45}
-          textAnchor="middle"
-          className="text-xs font-medium"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isSelected || node.status === "completed" ? 1 : 0.7 }}
-        >
-          {node.title}
-        </motion.text>
-        
-        {/* Render children recursively */}
-        {node.children?.map((child, childIndex) => 
-          renderNode(child, index + childIndex, level + 1)
-        )}
-      </motion.g>
-    );
-  };
-
+    setNodes(flowNodes);
+    setEdges(flowEdges);
+  }, [treeData, selectedNode, onNodeSelect]);
+  
+  // When a node or an edge is clicked
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    // The click handler is handled in the CustomNode component
+  }, []);
+  
   return (
-    <div className="w-full h-full overflow-auto">
-      <svg
-        ref={svgRef}
-        width="1200"
-        height="600"
-        className="min-w-full min-h-full"
+    <div className="w-full h-full">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        fitView
+        fitViewOptions={{ padding: 0.2 }}
+        connectionLineType={ConnectionLineType.SmoothStep}
+        className="bg-transparent"
+        minZoom={0.5}
+        maxZoom={1.5}
+        attributionPosition="bottom-right"
       >
-        <g transform="translate(40, 20)">
-          {renderNode(treeData.rootNode, 0, 0)}
-        </g>
-      </svg>
+        <Controls showInteractive={false} position="bottom-right" />
+        <Background color="#a18d7d" gap={20} size={1} />
+      </ReactFlow>
     </div>
   );
 };
