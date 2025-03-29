@@ -11,7 +11,7 @@ const nodeTypes = {
 
 const edgeTypes = {
   custom: CustomEdge
-};
+} as const;
 
 export const TreeVisualization = ({ 
   treeData: initialTreeData, 
@@ -27,30 +27,31 @@ export const TreeVisualization = ({
   const [treeData, setTreeData] = useState<TreeData>(initialTreeData);
   
   const processNode = useCallback((node: Node, level: number, globalIndex: number, accumulator: { nodes: any[], edges: any[], lastIndex: number }, parentId?: string) => {
-    // Calculate position with Git-like tree layout
+    // Calculate positions for diagonal layout
     const screenWidth = window.innerWidth;
     const isMobile = screenWidth < 640;
-    const isTablet = screenWidth >= 640 && screenWidth < 1024;
     
     // Adjust spacing based on device size
-    const verticalSpacing = isMobile ? 60 : isTablet ? 80 : 100;
+    const verticalSpacing = isMobile ? 120 : 150;
+    const horizontalSpacing = isMobile ? 80 : 120;
     
-    // Calculate positions for vertical line layout
-    const x = screenWidth / 2; // Center horizontally
+    // Calculate diagonal positions
+    const baseX = screenWidth / 2;
+    const x = baseX + (accumulator.lastIndex % 2 === 0 ? -horizontalSpacing : horizontalSpacing);
     const y = accumulator.lastIndex * verticalSpacing + 100;
-    accumulator.lastIndex += 1; // Increment for next node
+    accumulator.lastIndex += 1;
     
     // Calculate node size and color based on level
     const getNodeStyle = (level: number) => {
-      const baseSize = isMobile 
-        ? { width: 160, height: 40 }
-        : { width: 200, height: 48 };
-      
+      const diameter = 50;
       return {
-        width: baseSize.width,
-        height: baseSize.height,
-        scale: isMobile ? 0.9 : 1,
-        primaryColor: '#FFFFFF'
+        width: diameter,
+        height: diameter,
+        scale: 1,
+        primaryColor: '#F0F0F0',
+        borderColor: '#000000',
+        borderWidth: 2,
+        borderRadius: '50%',
       };
     };
     
@@ -65,55 +66,33 @@ export const TreeVisualization = ({
         node,
         isSelected: selectedNode?.id === node.id,
         onSelect: onNodeSelect,
-        style: nodeStyle
+        style: nodeStyle,
+        index: accumulator.lastIndex
       },
-      className: 'node-rectangle',
+      className: 'node-circle',
       style: {
-        background: 'none',
-        border: 'none'
+        background: nodeStyle.primaryColor,
+        border: `${nodeStyle.borderWidth}px solid ${nodeStyle.borderColor}`,
+        borderRadius: nodeStyle.borderRadius,
       }
     };
     
-    // Add edges with curved paths
+    // Add edge between parent and current node
     if (parentId) {
       const edgeStyle: React.CSSProperties = {
         stroke: '#000000',
-        strokeWidth: 1.5,
+        strokeWidth: 2,
+        strokeDasharray: '5,5',
         opacity: 0.6
       };
-      
-      // Add the edge
-      // Calculate control points for curved path
-      const sourceNode = accumulator.nodes.find(n => n.id === parentId);
-      if (sourceNode) {
-        const sourceX = sourceNode.position.x;
-        const sourceY = sourceNode.position.y;
-        const targetX = x;
-        const targetY = y;
-        
-        accumulator.edges.push({
-          id: `${parentId}-${node.id}`,
-          source: parentId,
-          target: node.id,
-          type: 'custom',
-          animated: false,
-          style: edgeStyle,
-          data: {
-            sourceX,
-            sourceY,
-            targetX,
-            targetY,
-            controlPoint1: {
-              x: sourceX,
-              y: sourceY + (targetY - sourceY) * 0.4
-            },
-            controlPoint2: {
-              x: targetX,
-              y: targetY - (targetY - sourceY) * 0.4
-            }
-          }
-        });
-      }
+      accumulator.edges.push({
+        id: `${parentId}-${node.id}`,
+        source: parentId,
+        target: node.id,
+        type: 'custom',
+        animated: false,
+        style: edgeStyle,
+      });
     }
     
     accumulator.nodes.push(flowNode);
@@ -162,14 +141,7 @@ export const TreeVisualization = ({
       nodesConnectable={false}
       elementsSelectable={true}
       defaultEdgeOptions={{
-        type: 'custom',
-        animated: false,
-        style: { strokeWidth: 3 },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20
-        },
+        type: 'custom'
       }}
       proOptions={{ hideAttribution: true }}
     >

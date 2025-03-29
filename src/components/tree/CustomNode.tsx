@@ -1,60 +1,38 @@
 import { motion } from "framer-motion";
-import { Check, Lock, ChevronRight } from "lucide-react";
 import { Node } from "@/types/tree";
 
-export const CustomNode = ({ data }: { data: { node: Node, isSelected: boolean, onSelect: (node: Node) => void, style: { width: number, height: number, scale: number, primaryColor: string } } }) => {
-  const { node, isSelected, onSelect } = data;
-  const { style } = data;
-  
-  // Define status-based styles
-  const getStatusStyles = () => {
-    const baseStyles = {
-      textColor: 'text-gray-700'
-    };
-    
-    if (node.status === "completed") {
-      return {
-        textColor: 'text-gray-700'
-      };
-    } else if (node.status === "active") {
-      return {
-        textColor: 'text-gray-700'
-      };
-    } else if (node.status === "locked") {
-      return {
-        textColor: 'text-gray-500'
-      };
-    }
-    
-    return baseStyles;
-  };
-  
-  const statusStyles = getStatusStyles();
+export const CustomNode = ({ data }: { data: { node: Node, isSelected: boolean, onSelect: (node: Node) => void, style: { width: number, height: number, scale: number, primaryColor: string }, index: number } }) => {
+  const { node, isSelected, onSelect, index } = data;
+  const isEven = index % 2 === 0;
   
   return (
-    <motion.div
-      className={`relative flex flex-col p-3 sm:p-4 bg-white border border-gray-200 ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
-      style={{ 
-        width: `${style.width}px`,
-        height: `${style.height}px`,
-        transform: `scale(${style.scale})`,
-        transformOrigin: 'center center'
-      }}
+    <div 
+      className="relative group"
       onClick={() => onSelect(node)}
-      whileHover={{ 
-        scale: style.scale * 1.02,
-        transition: { duration: 0.2 }
-      }}
-      whileTap={{ 
-        scale: style.scale * 0.98,
-        transition: { duration: 0.1 }
-      }}
     >
-      <div className="flex items-center justify-center w-full h-full">
-        <span className={`font-semibold ${statusStyles.textColor} text-sm sm:text-base text-center`}>
-          {node.title}
-        </span>
+      {/* Title */}
+      <div 
+        className={`absolute ${isEven ? 'right-full mr-3' : 'left-full ml-3'} top-1/2 -translate-y-1/2 text-sm font-medium whitespace-nowrap`}
+      >
+        {node.title}
       </div>
-    </motion.div>
+
+      {/* Circle */}
+      <motion.div
+        className={`w-12 h-12 rounded-full transition-all duration-200 ${isSelected ? 'ring-2 ring-primary' : ''}`}
+        style={{
+          background: '#F0F0F0',
+          border: '2px solid #000000',
+        }}
+        whileHover={{ 
+          scale: 1.05,
+          transition: { duration: 0.2 }
+        }}
+        whileTap={{ 
+          scale: 0.95,
+          transition: { duration: 0.1 }
+        }}
+      />
+    </div>
   );
 };
