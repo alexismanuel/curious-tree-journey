@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Search, Sparkles, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import sendCreateCourse from "@/api/webhook";
-import { send } from "process";
 
 interface LearningPathCreationProps {
   onCreatePath: (goal: string) => void;
@@ -41,9 +40,10 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
     setIsCreating(true);
 
     try {
-      const response = await sendCreateCourse(goal, "débutant");
+      const response = await sendCreateCourse(goal);
       // Tu peux utiliser la réponse ici
       onCreatePath(goal);
+      
     } catch (error) {
       console.error("Erreur lors de la création du cours :", error);
       // Gère l'erreur côté UI si besoin
