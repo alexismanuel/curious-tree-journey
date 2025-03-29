@@ -37,7 +37,7 @@ interface Chapitre {
 export const generateTreeFromCourseData = (courseData: CourseData, goal?: string): TreeData => {
   // Utiliser le titre du cours s'il existe, sinon utiliser un titre par défaut
   const courseTitle = courseData.titre.trim() || (goal && typeof goal === 'string' 
-    ? `Introduction to ${goal.split(" ").slice(-1)[0]}`
+    ? `Introduction à Learn Anything`
     : "Introduction au cours");
   
   // Créer le nœud racine
