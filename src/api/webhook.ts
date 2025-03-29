@@ -6,6 +6,7 @@
  * @returns La réponse du webhook convertie en JSON.
  */
 async function sendCreateCourse(create_course: string): Promise<any> {
+    console.log('Envoie de la requête');
     try {
         const response = await fetch('https://hook.eu1.make.com/ihmym1n82oq1hqb7sa83fa5n5mwa8v48', {
             method: 'POST',

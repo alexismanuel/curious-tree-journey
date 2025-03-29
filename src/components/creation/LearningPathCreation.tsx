@@ -3,22 +3,13 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {sendCreateCourse } from "@/api/webhook";
 
 interface LearningPathCreationProps {
   onCreatePath: (goal: string) => void;
 }
-
-const suggestions = [
-"Apprendre la programmation Python",
-"Comprendre la physique quantique",
-"Maîtriser les fondamentaux du marketing digital",
-"Apprendre à jouer de la guitare",
-"Comprendre les concepts de l’apprentissage automatique",
-"Histoire de l’art de la Renaissance"
-];
 
 const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
   const [goal, setGoal] = useState("");
@@ -40,7 +31,7 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
     setIsCreating(true);
 
     try {
-      const response = await sendCreateCourse(goal);
+      //const response = await sendCreateCourse(goal);
       // Tu peux utiliser la réponse ici
       onCreatePath(goal);
       

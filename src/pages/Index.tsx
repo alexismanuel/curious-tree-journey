@@ -6,6 +6,7 @@ import { PersonalizationForm } from "@/components/creation/PersonalizationForm";
 import { PathView } from "@/components";
 import { generateInitialTree } from "@/lib/tree-generator";
 import { ProgressDots } from "@/components/ui/progress-dots";
+import { sendCreateCourse } from "@/api/webhook";
 
 const Index = () => {
   const [stage, setStage] = useState<"creation" | "personalization" | "tree">("creation");
@@ -18,14 +19,13 @@ const Index = () => {
   };
 
   const handlePersonalization = async (details: string) => {
-    // Placeholder for webhook response
-    const mockResponse = {
-      context: `Tu veux apprendre ${learningGoal}, c'est super ! Dis m'en plus sur tes objectifs`,
-      details: `Tu peux préciser ton niveau actuel, le style de musique que tu aimes, une chanson que tu veux jouer ou ton objectif (jouer en groupe, te détendre, etc.).`
-    };
 
+    // Fusionne le but d'apprentissage et les détails de personnalisation
+    const personalizedGoal = `${learningGoal} ${details}`;
+    console.log("Personalized Goal:", personalizedGoal);
+    const response = await sendCreateCourse(personalizedGoal);
     // Generate a tree locally without persisting
-    const initialTree = generateInitialTree(learningGoal);
+    const initialTree = generateInitialTree(response);
     setTreeData(initialTree);
     
     // Show the tree visualization
