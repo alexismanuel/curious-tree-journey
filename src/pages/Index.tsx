@@ -33,7 +33,7 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-background overflow-hidden">
       {/* Minimal background */}
       <div className="absolute inset-0 overflow-hidden">
         <div 
@@ -43,7 +43,7 @@ const Index = () => {
 
       {/* Progress dots */}
       {(stage === "creation" || stage === "personalization") && (
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 z-20">
+        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-20">
           <ProgressDots 
             totalSteps={2} 
             currentStep={stage === "creation" ? 1 : 2} 
@@ -53,7 +53,7 @@ const Index = () => {
 
       {/* Content */}
       <motion.div 
-        className="flex-1 flex items-center justify-center px-4 relative z-10"
+        className="flex-1 flex items-start sm:items-center justify-center px-4 relative z-10 pt-32 sm:pt-0"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
