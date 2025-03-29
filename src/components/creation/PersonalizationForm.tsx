@@ -31,9 +31,6 @@ export const PersonalizationForm = ({ goal, onboardMsg, onSubmit }: Personalizat
           <p className="text-lg text-muted-foreground">
             {onboardMsg}
           </p>
-          <p className="text-base text-muted-foreground">
-            Tu peux préciser ton niveau actuel, tes expériences passées, ou tes objectifs spécifiques pour personnaliser ton parcours d'apprentissage.
-          </p>
         </div>
       </div>
 
