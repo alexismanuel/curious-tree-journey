@@ -12,12 +12,12 @@ interface LearningPathCreationProps {
 }
 
 const suggestions = [
-  "Learn Python programming from scratch",
-  "Understand quantum physics basics",
-  "Master digital marketing fundamentals",
-  "Learn to play the guitar",
-  "Understand machine learning concepts",
-  "History of Renaissance art"
+"Apprendre la programmation Python depuis zéro",
+"Comprendre les bases de la physique quantique",
+"Maîtriser les fondamentaux du marketing digital",
+"Apprendre à jouer de la guitare",
+"Comprendre les concepts de l’apprentissage automatique",
+"Histoire de l’art de la Renaissance"
 ];
 
 const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
@@ -30,8 +30,8 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
     
     if (!goal.trim()) {
       toast({
-        title: "Please enter a learning goal",
-        description: "Tell us what you'd like to learn",
+        title: "Entrer votre objectif d'apprentissage",
+        description: "Que voulez-vous apprendre ?",
         variant: "destructive"
       });
       return;
@@ -118,7 +118,7 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
 
       <div className="text-center text-sm text-muted-foreground">
         <p>
-          We'll create a customized learning path with interactive nodes to guide your journey
+        Nous créerons un parcours d'apprentissage personnalisé avec des nœuds interactifs pour guider votre voyage.
         </p>
       </div>
     </motion.div>
