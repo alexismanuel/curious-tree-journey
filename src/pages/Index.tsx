@@ -32,10 +32,11 @@ const Index = () => {
       
       // Attendre la réponse de l'API
       const response = await generatePlanningTree(personalizedGoal);
+      saveToLocalStorage("coursePlan", response);
       setLearningGoal(response.title)
       const courseData = await sendCreateCourse(response);
+      saveToLocalStorage("courseData", courseData);
       console.log("Course Data:", courseData);
-      saveToLocalStorage("courseData", response);
       
       // Generate a tree locally without persisting
       const initialTree = generateTreeFromCourseData(response);
