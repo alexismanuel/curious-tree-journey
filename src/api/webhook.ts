@@ -5,14 +5,14 @@
  * @param create_course - La donnée à transmettre au webhook.
  * @returns La réponse du webhook convertie en JSON.
  */
-async function sendCreateCourse(create_course: any): Promise<any> {
+async function sendCreateCourse(create_course: string, level: string): Promise<any> {
     try {
         const response = await fetch('https://hook.eu1.make.com/ihmym1n82oq1hqb7sa83fa5n5mwa8v48', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ create_course })
+            body: JSON.stringify({ create_course, level })
         });
 
         // Vérification du statut de la réponse
@@ -22,9 +22,12 @@ async function sendCreateCourse(create_course: any): Promise<any> {
 
         // Conversion de la réponse en JSON et retour
         const data = await response.json();
+        console.log('Réponse du webhook:', data);
         return data;
     } catch (error) {
         console.error('Erreur lors de l\'appel du webhook:', error);
         throw error;
     }
 }
+
+export default sendCreateCourse;

@@ -3,17 +3,18 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Search, Sparkles, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import sendCreateCourse from "@/api/webhook";
+import { send } from "process";
 
 interface LearningPathCreationProps {
   onCreatePath: (goal: string) => void;
 }
 
 const suggestions = [
-"Apprendre la programmation Python depuis zéro",
-"Comprendre les bases de la physique quantique",
+"Apprendre la programmation Python",
+"Comprendre la physique quantique",
 "Maîtriser les fondamentaux du marketing digital",
 "Apprendre à jouer de la guitare",
 "Comprendre les concepts de l’apprentissage automatique",
@@ -25,7 +26,7 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!goal.trim()) {
@@ -38,12 +39,22 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
     }
     
     setIsCreating(true);
-    
-    // Simulate API call to create learning path
-    setTimeout(() => {
-      setIsCreating(false);
+
+    try {
+      const response = await sendCreateCourse(goal, "débutant");
+      // Tu peux utiliser la réponse ici
       onCreatePath(goal);
-    }, 2000);
+    } catch (error) {
+      console.error("Erreur lors de la création du cours :", error);
+      // Gère l'erreur côté UI si besoin
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite lors de la création du cours.",
+        variant: "destructive"
+      });
+      setIsCreating(false);
+      return;
+    }
   };
 
   return (
@@ -55,10 +66,10 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
     >
       <div className="text-center mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-3 text-bark-900">
-          What would you like to learn?
+          Que voulez-vous apprendre ?
         </h1>
         <p className="text-muted-foreground text-lg">
-          Enter a topic, skill, or subject to create your personalized learning journey
+          Entrer un sujet, une compétence ou un thème pour créer votre parcours d'apprentissage personnalisé
         </p>
       </div>
 
