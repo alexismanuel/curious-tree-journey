@@ -32,18 +32,18 @@ export const TreeVisualization = ({
     const isMobile = screenWidth < 640;
 
     // Adjust spacing based on device size
-    const verticalSpacing = isMobile ? 120 : 150;
-    const horizontalSpacing = isMobile ? 80 : 120;
+    const verticalSpacing = isMobile ? 80 : 100;
+    const horizontalSpacing = isMobile ? 20 : 25;
 
-    // Calculate diagonal positions
+    // Calculate zigzag positions
     const baseX = screenWidth / 2;
     const x = baseX + (accumulator.lastIndex % 2 === 0 ? -horizontalSpacing : horizontalSpacing);
-    const y = accumulator.lastIndex * verticalSpacing + 100;
+    const y = accumulator.lastIndex * verticalSpacing + 50;
     accumulator.lastIndex += 1;
 
     // Calculate node size and color based on level
     const getNodeStyle = (level: number) => {
-      const diameter = 50;
+      const diameter = 40;
       return {
         width: diameter,
         height: diameter,
@@ -89,9 +89,17 @@ export const TreeVisualization = ({
         id: `${parentId}-${node.id}`,
         source: parentId,
         target: node.id,
+        sourceHandle: 'bottom',  // Matches the source handle ID in CustomNode
+        targetHandle: 'top',     // Matches the target handle ID in CustomNode
         type: 'custom',
         animated: false,
         style: edgeStyle,
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 20,
+          height: 20,
+          color: '#000000',
+        },
       });
     }
 
