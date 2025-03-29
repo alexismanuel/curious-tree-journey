@@ -24,9 +24,8 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid #A18D7D;
+  background: transparent;
+  border: none;
   transition: all 0.2s ease;
 }
 
@@ -40,9 +39,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
   background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
 
@@ -241,7 +238,7 @@ html, body {
 @layer components {
   /* Tree Node Styles */
   .node {
-    @apply flex items-center justify-center rounded-full cursor-pointer transition-all;
+    @apply flex items-center justify-center cursor-pointer transition-all;
   }
 
   .node-completed {

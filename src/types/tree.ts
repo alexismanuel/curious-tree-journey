@@ -4,6 +4,7 @@ export interface Node {
   description: string;
   status: "active" | "completed" | "upcoming" | "locked";
   children: Node[];
+  tags?: string[];
 }
 
 export interface TreeData {

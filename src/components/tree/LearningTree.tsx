@@ -16,7 +16,8 @@ const ProgressIndicator = ({ completed, total }: { completed: number; total: num
   </div>
 );
 
-export const PathView = ({ learningGoal, treeData }: { learningGoal: string; treeData: TreeData }) => {
+export const PathView = ({ learningGoal, treeData: initialTreeData }: { learningGoal: string; treeData: TreeData }) => {
+  const [treeData, setTreeData] = useState<TreeData>(initialTreeData);
   const [activeNode, setActiveNode] = useState<Node | null>(null);
   const { toast } = useToast();
   
@@ -25,7 +26,11 @@ export const PathView = ({ learningGoal, treeData }: { learningGoal: string; tre
   const completedNodes = treeData.nodes.filter(node => node.status === "completed").length;
   
   const handleNodeSelect = (node: Node) => {
-    if (node.status === "locked") {
+    // Find the latest version of the node from treeData
+    const latestNode = treeData.nodes.find(n => n.id === node.id);
+    if (!latestNode) return;
+    
+    if (latestNode.status === "locked") {
       toast({
         title: "Node Locked",
         description: "Complete the previous nodes to unlock this one.",
@@ -33,7 +38,7 @@ export const PathView = ({ learningGoal, treeData }: { learningGoal: string; tre
       });
       return;
     }
-    setActiveNode(node);
+    setActiveNode(latestNode);
   };
   
   const handleCompleteNode = () => {
@@ -50,7 +55,13 @@ export const PathView = ({ learningGoal, treeData }: { learningGoal: string; tre
       return node;
     });
     
-    treeData.nodes = updatedNodes;
+    // Update the tree data with new nodes
+    setTreeData({
+      ...treeData,
+      nodes: updatedNodes,
+      rootNode: updatedNodes.find(node => node.id === treeData.rootNode.id) || treeData.rootNode
+    });
+    
     toast({
       title: "Node Completed",
       description: "Great job! You can now move on to the next topic.",
@@ -98,14 +109,15 @@ export const PathView = ({ learningGoal, treeData }: { learningGoal: string; tre
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <div className="absolute top-6 left-6 z-10">
+                <div className="flex items-center justify-between p-4 border-b">
                   <button
                     onClick={() => setActiveNode(null)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/10 hover:bg-secondary/20 transition-colors text-sm font-medium"
                   >
                     <Home className="h-4 w-4" />
                     <span>Back to Tree</span>
                   </button>
+                  <h2 className="text-lg font-semibold">{activeNode?.title}</h2>
                 </div>
                 <ConversationPanel
                   key={activeNode.id}
