@@ -4,10 +4,13 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { PathView } from "@/components/LearningTree";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
-import PathView from "./pages/PathView";
 import NotFound from "./pages/NotFound";
+
+// Add core CSS for styling
+import "./index.css";
 
 const queryClient = new QueryClient();
 
