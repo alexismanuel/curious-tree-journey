@@ -1,221 +1,71 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lexend:wght@300;400;500;600;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Add this to your existing CSS */
 
-@layer base {
-  :root {
-    --background: 195 30% 97%;
-    --foreground: 222 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 84% 4.9%;
-
-    --primary: 151 46% 57%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 300 46% 72%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 195 81% 70%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 151 46% 57%;
-
-    --radius: 0.75rem;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 224 71% 4%;
-    --foreground: 210 40% 98%;
-
-    --card: 224 71% 4%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 224 71% 4%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 151 46% 57%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 300 46% 72%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 195 81% 70%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 151 46% 57%;
-  }
+/* Tree Node Styles */
+.node {
+  @apply flex items-center justify-center rounded-full cursor-pointer transition-all;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground font-sans;
-    background-image: 
-      radial-gradient(at 90% 8%, hsla(195, 100%, 80%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 10% 30%, hsla(151, 46%, 57%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 80% 80%, hsla(300, 46%, 72%, 0.05) 0px, transparent 50%);
-    background-attachment: fixed;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-semibold tracking-tight;
-  }
+.node-completed {
+  @apply bg-leaf-500 text-white;
 }
 
-@layer components {
-  /* Tree node states */
-  .node {
-    @apply relative flex items-center justify-center rounded-full transition-all duration-300 ease-in-out border-2;
-  }
-
-  .node-completed {
-    @apply bg-leaf-500 border-leaf-600 text-white shadow-md;
-  }
-
-  .node-active {
-    @apply bg-white border-leaf-500 text-leaf-800 shadow-lg animate-pulse-gentle;
-  }
-
-  .node-upcoming {
-    @apply bg-white/80 border-leaf-200 text-leaf-600 shadow-sm;
-  }
-  
-  .node-locked {
-    @apply bg-white/60 border-muted text-muted-foreground shadow-sm;
-  }
-
-  /* Branch styles */
-  .branch {
-    @apply stroke-bark-300 stroke-[3] opacity-80;
-    stroke-dasharray: 100;
-  }
-  
-  .branch-completed {
-    @apply stroke-leaf-400 animate-branch-grow;
-  }
-  
-  /* React Flow customizations */
-  .react-flow__controls {
-    @apply !bg-white/80 !shadow-sm !rounded-md;
-  }
-  
-  .react-flow__controls-button {
-    @apply !border-none !bg-transparent hover:!bg-leaf-100;
-  }
-  
-  .react-flow__attribution {
-    @apply !bg-transparent !text-bark-400 !text-xs;
-  }
-  
-  .react-flow__edge-path {
-    stroke-linecap: round;
-  }
-  
-  .react-flow__background {
-    @apply !bg-transparent;
-  }
-  
-  /* Chat styles */
-  .chat-bubble {
-    @apply rounded-2xl px-4 py-3 max-w-[85%];
-  }
-  
-  .chat-ai {
-    @apply bg-sky-100 text-bark-900;
-  }
-  
-  .chat-user {
-    @apply bg-primary text-white;
-  }
-
-  /* Magical elements */
-  .glassmorphic {
-    @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-sm;
-  }
-  
-  .floating {
-    @apply animate-pulse-gentle;
-  }
-  
-  /* Progress indicators */
-  .progress-pill {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
-  }
-  
-  /* Buttons */
-  .btn-primary {
-    @apply inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
-  }
-  
-  .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
-  }
-  
-  .btn-outline {
-    @apply inline-flex items-center justify-center rounded-md border border-input bg-transparent px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
-  }
+.node-active {
+  @apply bg-blossom-500 text-white;
 }
 
-/* Custom class for decorative elements */
+.node-upcoming {
+  @apply bg-white border border-muted-foreground;
+}
+
+.node-locked {
+  @apply bg-gray-200 text-gray-400 cursor-not-allowed;
+}
+
+/* Branch Styles */
+.branch {
+  @apply stroke-muted-foreground stroke-[2px];
+}
+
+.branch-completed {
+  @apply stroke-leaf-500;
+}
+
+/* Glassmorphic Container */
+.glassmorphic {
+  @apply bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg;
+}
+
+/* Floating Background Circles */
 .floating-circle {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(40px);
-  z-index: -1;
-  opacity: 0.4;
+  @apply absolute rounded-full blur-3xl opacity-40;
+  animation: float 15s ease-in-out infinite;
 }
 
-/* Custom element animation for tree growth */
-@keyframes branch-extend {
-  from {
-    stroke-dashoffset: 100;
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
   }
-  to {
-    stroke-dashoffset: 0;
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(0) translateX(20px);
+  }
+  75% {
+    transform: translateY(20px) translateX(10px);
   }
 }
 
-@keyframes leaf-appearance {
-  0% {
-    opacity: 0;
-    transform: scale(0.5) rotate(-20deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0);
-  }
+/* Chat Bubbles */
+.chat-bubble {
+  @apply p-3 rounded-lg max-w-xs break-words;
+}
+
+.chat-ai {
+  @apply bg-sky-50 text-bark-800 rounded-bl-none;
+}
+
+.chat-user {
+  @apply bg-leaf-50 text-bark-800 rounded-br-none;
 }

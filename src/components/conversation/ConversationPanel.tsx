@@ -7,14 +7,9 @@ import { Progress } from "@/components/ui/progress";
 import { Node } from "@/types/tree";
 import { Send, Sparkles, BookOpen, CheckCircle, RotateCcw } from "lucide-react";
 import ChatMessage from "./ChatMessage";
-import { generateInitialMessages } from "@/lib/conversation-generator";
-
-interface Message {
-  id: string;
-  sender: "ai" | "user";
-  content: string;
-  timestamp: Date;
-}
+import { useTreeStore } from "@/store/useTreeStore";
+import { fetchConversation, saveMessage, generateAIResponse, Message } from "@/api/conversations";
+import { useToast } from "@/hooks/use-toast";
 
 interface ConversationPanelProps {
   node: Node;
@@ -27,71 +22,94 @@ const ConversationPanel = ({ node, onComplete }: ConversationPanelProps) => {
   const [isTyping, setIsTyping] = useState(false);
   const [progress, setProgress] = useState(node.status === "completed" ? 100 : 0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { currentPath } = useTreeStore();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Initialize conversation based on node
-    const initialMessages = generateInitialMessages(node);
-    setMessages(initialMessages);
+    const loadMessages = async () => {
+      if (!currentPath) return;
+      
+      try {
+        setIsTyping(true);
+        const conversationMessages = await fetchConversation(currentPath, node.id);
+        
+        if (conversationMessages.length === 0) {
+          // If no conversation exists, generate initial message
+          const initialMessage: Omit<Message, 'id'> = {
+            sender: 'ai',
+            content: `Let's explore the concept of "${node.title}". ${node.description}. What would you like to know about this topic?`,
+            timestamp: new Date().toISOString(),
+          };
+          
+          const savedMessage = await saveMessage(currentPath, node.id, initialMessage);
+          setMessages([savedMessage]);
+        } else {
+          setMessages(conversationMessages);
+        }
+        
+        // Update progress based on message count
+        if (node.status !== "completed") {
+          const progress = Math.min(100, conversationMessages.length * 15);
+          setProgress(progress);
+        }
+      } catch (error) {
+        console.error('Error loading conversation:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load conversation",
+          variant: "destructive"
+        });
+      } finally {
+        setIsTyping(false);
+      }
+    };
     
     // Reset progress based on node status
     setProgress(node.status === "completed" ? 100 : 0);
     
-    // Simulate AI typing the first message
-    setIsTyping(true);
-    setTimeout(() => setIsTyping(false), 1000);
-  }, [node]);
+    loadMessages();
+  }, [node, currentPath, toast]);
 
   useEffect(() => {
     // Scroll to bottom when messages change
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (!input.trim()) return;
+  const handleSendMessage = async () => {
+    if (!input.trim() || !currentPath) return;
     
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      sender: "user",
-      content: input,
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    setInput("");
-    
-    // Simulate AI typing
-    setIsTyping(true);
-    
-    // Simulate AI response after a delay
-    setTimeout(() => {
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: "ai",
-        content: getAIResponse(input, node),
-        timestamp: new Date()
+    try {
+      // Add user message
+      const userMessage: Omit<Message, 'id'> = {
+        sender: "user",
+        content: input,
+        timestamp: new Date().toISOString()
       };
       
+      const savedUserMessage = await saveMessage(currentPath, node.id, userMessage);
+      setMessages(prev => [...prev, savedUserMessage]);
+      setInput("");
+      
+      // Simulate AI typing
+      setIsTyping(true);
+      
+      // Generate AI response
+      const aiMessage = await generateAIResponse(currentPath, node.id, input);
       setMessages(prev => [...prev, aiMessage]);
-      setIsTyping(false);
       
       // Update progress
-      setProgress(prev => Math.min(100, prev + 20));
-    }, 1500);
-  };
-
-  // Simple AI response generator based on input and node
-  const getAIResponse = (userInput: string, node: Node): string => {
-    const responses = [
-      `That's a great observation about ${node.title}. Let me elaborate further...`,
-      `You're right, and there's even more to ${node.title} than that...`,
-      `Excellent question! When learning about ${node.title}, it's important to understand...`,
-      `I see your point. In the context of ${node.title}, experts would typically...`,
-      `Let's explore that idea. If we connect ${node.title} with what you already know...`
-    ];
-    
-    return responses[Math.floor(Math.random() * responses.length)] + 
-      " Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+      setProgress(prev => Math.min(100, prev + 15));
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive"
+      });
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
@@ -117,7 +135,7 @@ const ConversationPanel = ({ node, onComplete }: ConversationPanelProps) => {
         <div className="mt-2">
           <div className="flex justify-between text-xs text-muted-foreground mb-1">
             <span>Learning Progress</span>
-            <span>{progress}%</span>
+            <span>{Math.round(progress)}%</span>
           </div>
           <Progress value={progress} className="h-1.5" />
         </div>

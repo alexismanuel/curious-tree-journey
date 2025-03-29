@@ -2,13 +2,7 @@
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sparkles, User } from "lucide-react";
-
-interface Message {
-  id: string;
-  sender: "ai" | "user";
-  content: string;
-  timestamp: Date;
-}
+import { Message } from "@/api/conversations";
 
 interface ChatMessageProps {
   message: Message;

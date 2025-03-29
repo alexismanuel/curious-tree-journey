@@ -1,37 +1,33 @@
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TreeVisualization from "./TreeVisualization";
 import ConversationPanel from "../conversation/ConversationPanel";
 import ProgressIndicator from "../progress/ProgressIndicator";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ChevronLeft, Home, Save, Share } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { generateInitialTree } from "@/lib/tree-generator";
-import { Node, TreeData, NodeStatus } from "@/types/tree";
+import { useTreeStore } from "@/store/useTreeStore";
+import { useNavigate } from "react-router-dom";
+import { ChevronLeft, Home, Save, Share, Loader2 } from "lucide-react";
 
 interface MainTreeViewProps {
   learningGoal: string;
 }
 
 const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
-  const [treeData, setTreeData] = useState<TreeData | null>(null);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { 
+    treeData, 
+    activeNode, 
+    isLoading, 
+    setActiveNode, 
+    completeNode,
+    savePath,
+    currentPath
+  } = useTreeStore();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const initialTree = generateInitialTree(learningGoal);
-      setTreeData(initialTree);
-      setSelectedNode(initialTree.rootNode);
-      setIsLoading(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [learningGoal]);
-
-  const handleNodeSelect = (node: Node) => {
+  const handleNodeSelect = (node) => {
     if (node.status === "locked") {
       toast({
         title: "Node Locked",
@@ -41,83 +37,43 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
       return;
     }
     
-    setSelectedNode(node);
-    
-    if (node.status === "upcoming") {
-      setTreeData(prev => {
-        if (!prev) return prev;
-        
-        const updateNodeStatus = (nodes: Node[]): Node[] => {
-          return nodes.map(n => {
-            if (n.id === node.id) {
-              return { ...n, status: "active" as NodeStatus };
-            }
-            
-            if (n.children) {
-              return { ...n, children: updateNodeStatus(n.children) };
-            }
-            
-            return n;
-          });
-        };
-        
-        return {
-          ...prev,
-          nodes: updateNodeStatus(prev.nodes),
-          rootNode: prev.rootNode.id === node.id 
-            ? { ...prev.rootNode, status: "active" as NodeStatus } 
-            : { ...prev.rootNode, children: updateNodeStatus(prev.rootNode.children) }
-        };
-      });
-    }
+    setActiveNode(node);
   };
 
-  const completeCurrentNode = () => {
-    if (!selectedNode) return;
+  const handleCompleteNode = () => {
+    if (!activeNode) return;
     
-    setTreeData(prev => {
-      if (!prev) return prev;
-      
-      const updateNodeStatus = (nodes: Node[]): Node[] => {
-        return nodes.map(n => {
-          if (n.id === selectedNode.id) {
-            return { ...n, status: "completed" as NodeStatus };
-          }
-          
-          if (n.id === selectedNode.id && n.children) {
-            return {
-              ...n,
-              status: "completed" as NodeStatus,
-              children: n.children.map(child => ({
-                ...child,
-                status: child.status === "locked" ? ("upcoming" as NodeStatus) : child.status
-              }))
-            };
-          }
-          
-          if (n.children) {
-            return { ...n, children: updateNodeStatus(n.children) };
-          }
-          
-          return n;
-        });
-      };
-      
-      const updatedRootNode = prev.rootNode.id === selectedNode.id 
-        ? { ...prev.rootNode, status: "completed" as NodeStatus } 
-        : { ...prev.rootNode, children: updateNodeStatus(prev.rootNode.children) };
-      
-      return {
-        ...prev,
-        nodes: updateNodeStatus(prev.nodes),
-        rootNode: updatedRootNode
-      };
-    });
+    completeNode(activeNode.id);
     
     toast({
       title: "Node Completed! 🎉",
       description: "Great job! You've mastered this concept.",
     });
+  };
+
+  const handleSave = async () => {
+    if (!currentPath) {
+      toast({
+        title: "Not logged in",
+        description: "Log in to save your progress",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      await savePath();
+      toast({
+        title: "Progress saved",
+        description: "Your learning progress has been saved",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save progress",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -149,9 +105,14 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="flex items-center">
-          <Button variant="ghost" size="sm" className="mr-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mr-2"
+            onClick={() => navigate(currentPath ? "/dashboard" : "/")}
+          >
             <Home className="h-4 w-4 mr-2" />
-            Home
+            {currentPath ? "Dashboard" : "Home"}
           </Button>
           <div className="text-muted-foreground">
             /<span className="ml-2 font-medium text-foreground">{learningGoal}</span>
@@ -159,7 +120,11 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleSave}
+          >
             <Save className="h-4 w-4 mr-2" />
             Save
           </Button>
@@ -191,7 +156,7 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
             {treeData && (
               <TreeVisualization 
                 treeData={treeData} 
-                selectedNode={selectedNode}
+                selectedNode={activeNode}
                 onNodeSelect={handleNodeSelect}
               />
             )}
@@ -205,11 +170,11 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
           transition={{ duration: 0.4, delay: 0.1 }}
         >
           <AnimatePresence mode="wait">
-            {selectedNode && (
+            {activeNode && (
               <ConversationPanel 
-                key={selectedNode.id}
-                node={selectedNode}
-                onComplete={completeCurrentNode}
+                key={activeNode.id}
+                node={activeNode}
+                onComplete={handleCompleteNode}
               />
             )}
           </AnimatePresence>
