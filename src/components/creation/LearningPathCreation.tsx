@@ -59,79 +59,46 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
 
   return (
     <motion.div
-      className="max-w-3xl w-full mx-auto glassmorphic rounded-2xl p-4 sm:p-8 md:p-12 overflow-hidden"
+      className="w-full max-w-lg mx-auto flex flex-col items-center gap-8 sm:gap-12"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="text-center mb-8">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3 text-bark-900">
-          Que voulez-vous apprendre ?
-        </h1>
-        <p className="text-muted-foreground text-base sm:text-lg px-4 sm:px-0">
-          Entrer un sujet, une compétence ou un thème pour créer votre parcours d'apprentissage personnalisé
-        </p>
+      <div className="flex flex-col items-center gap-4">
+        <h1 className="text-4xl font-bold tracking-tight">Learn Anything</h1>
+        <p className="text-xl text-muted-foreground">Que voulez vous apprendre ?</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="mb-4 sm:mb-8 px-2 sm:px-0">
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+      <form onSubmit={handleSubmit} className="w-full">
+        <div className="flex flex-col gap-4">
+          <div className="relative">
             <Input
               value={goal}
               onChange={(e) => setGoal(e.target.value)}
-              placeholder="e.g., Learn JavaScript fundamentals"
-              className="pl-10 py-4 sm:py-6 text-base sm:text-lg"
+              placeholder="Je veux apprendre..."
+              className="h-14 px-4 text-lg ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
+            <Button 
+              type="submit" 
+              size="icon"
+              variant="default"
+              disabled={isCreating}
+              className="absolute right-2 top-2 h-10 w-10 bg-primary hover:bg-primary/90"
+            >
+              {isCreating ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <Sparkles className="h-5 w-5" />
+                </motion.div>
+              ) : (
+                <ArrowRight className="h-5 w-5" />
+              )}
+            </Button>
           </div>
-          <Button 
-            type="submit" 
-            disabled={isCreating} 
-            className="bg-leaf-500 hover:bg-leaf-600 text-white py-4 sm:py-6 mt-2 sm:mt-0"
-          >
-            {isCreating ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles className="h-5 w-5" />
-              </motion.div>
-            ) : (
-              <ArrowRight className="h-5 w-5" />
-            )}
-          </Button>
         </div>
       </form>
-
-      <div className="mb-6 sm:mb-8">
-        <h3 className="text-sm font-medium text-muted-foreground mb-4">
-          Or try one of these suggestions:
-        </h3>
-        <div className="flex flex-wrap gap-2 px-2 sm:px-0">
-          {suggestions.map((suggestion, index) => (
-            <motion.div 
-              key={index}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index, duration: 0.3 }}
-            >
-              <Button 
-                variant="outline"
-                className="text-xs sm:text-sm whitespace-normal h-auto py-2 text-left"
-                onClick={() => setGoal(suggestion)}
-              >
-                {suggestion}
-              </Button>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      <div className="text-center text-sm text-muted-foreground">
-        <p>
-        Nous créerons un parcours d'apprentissage personnalisé avec des nœuds interactifs pour guider votre voyage.
-        </p>
-      </div>
     </motion.div>
   );
 };
