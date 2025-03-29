@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {sendCreateCourse } from "@/api/webhook";
 
 interface LearningPathCreationProps {
   onCreatePath: (goal: string) => void;

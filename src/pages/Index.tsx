@@ -1,17 +1,19 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import LearningPathCreation from "@/components/creation/LearningPathCreation";
 import { PersonalizationForm } from "@/components/creation/PersonalizationForm";
 import { PathView } from "@/components";
-import { generateInitialTree } from "@/lib/tree-generator";
+import { generateTreeFromCourseData } from "@/lib/tree-generator";
 import { ProgressDots } from "@/components/ui/progress-dots";
-import { sendCreateCourse } from "@/api/webhook";
+import { generatePlanningTree,sendCreateCourse } from "@/api/webhook";
+import { saveToLocalStorage } from "@/utils/localStorage";
+import LoadingBar from "@/components/ui/LoadingBar";
 
 const Index = () => {
-  const [stage, setStage] = useState<"creation" | "personalization" | "tree">("creation");
+  const [stage, setStage] = useState<"creation" | "personalization" | "tree" | "loading">("creation");
   const [learningGoal, setLearningGoal] = useState<string>("");
   const [treeData, setTreeData] = useState<any>(null);
+  const [loadingMessage, setLoadingMessage] = useState<string>("Génération de votre parcours d'apprentissage...");
 
   const handleCreatePath = (goal: string) => {
     setLearningGoal(goal);
@@ -19,17 +21,35 @@ const Index = () => {
   };
 
   const handlePersonalization = async (details: string) => {
+    // Passer à l'étape de chargement
+    setStage("loading");
+    setLoadingMessage("Génération de votre parcours d'apprentissage personnalisé...");
 
-    // Fusionne le but d'apprentissage et les détails de personnalisation
-    const personalizedGoal = `${learningGoal} ${details}`;
-    console.log("Personalized Goal:", personalizedGoal);
-    const response = await sendCreateCourse(personalizedGoal);
-    // Generate a tree locally without persisting
-    const initialTree = generateInitialTree(response);
-    setTreeData(initialTree);
-
-    // Show the tree visualization
-    setStage("tree");
+    try {
+      // Fusionne le but d'apprentissage et les détails de personnalisation
+      const personalizedGoal = `${learningGoal} ${details}`;
+      console.log("Personalized Goal:", personalizedGoal);
+      
+      // Attendre la réponse de l'API
+      const response = await generatePlanningTree(personalizedGoal);
+      const courseData = await sendCreateCourse(response);
+      console.log("Course Data:", courseData);
+      saveToLocalStorage("courseData", response);
+      
+      // Generate a tree locally without persisting
+      const initialTree = generateTreeFromCourseData(response);
+      setTreeData(initialTree);
+      
+      // Show the tree visualization
+      setStage("tree");
+    } catch (error) {
+      console.error("Error creating course:", error);
+      setLoadingMessage("Une erreur est survenue. Veuillez réessayer.");
+      // Après un délai, revenir à l'étape de personnalisation
+      setTimeout(() => {
+        setStage("personalization");
+      }, 3000);
+    }
   };
 
   return (
@@ -60,6 +80,7 @@ const Index = () => {
       >
         {stage === "creation" && <LearningPathCreation onCreatePath={handleCreatePath} />}
         {stage === "personalization" && <PersonalizationForm goal={learningGoal} onSubmit={handlePersonalization} />}
+        {stage === "loading" && <LoadingBar message={loadingMessage} color="indigo" width={350} />}
         {stage === "tree" && <PathView learningGoal={learningGoal} treeData={treeData} />}
       </motion.div>
     </div>
