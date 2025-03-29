@@ -97,7 +97,7 @@ export const TreeVisualization = ({
       maxZoom={1.5}
       nodesDraggable={false}
       nodesConnectable={false}
-      elementsSelectable={false}
+      elementsSelectable={true}
       proOptions={{ hideAttribution: true }}
     >
       <Background />

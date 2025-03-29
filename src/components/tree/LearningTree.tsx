@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Home, CheckCircle, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
-import { TreeData } from "@/types/tree";
+import { TreeData, Node } from "@/types/tree";
 import { TreeVisualization } from "./TreeVisualization";
 import { ConversationPanel } from "./ConversationPanel";
 
@@ -17,14 +17,14 @@ const ProgressIndicator = ({ completed, total }: { completed: number; total: num
 );
 
 export const PathView = ({ learningGoal, treeData }: { learningGoal: string; treeData: TreeData }) => {
-  const [activeNode, setActiveNode] = useState<typeof treeData.rootNode | null>(null);
+  const [activeNode, setActiveNode] = useState<Node | null>(null);
   const { toast } = useToast();
   
   // Calculate progress
   const totalNodes = treeData.nodes.length;
   const completedNodes = treeData.nodes.filter(node => node.status === "completed").length;
   
-  const handleNodeSelect = (node: typeof activeNode) => {
+  const handleNodeSelect = (node: Node) => {
     if (node.status === "locked") {
       toast({
         title: "Node Locked",
