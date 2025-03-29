@@ -13,11 +13,11 @@ const edgeTypes = {
   custom: CustomEdge
 } as const;
 
-export const TreeVisualization = ({ 
-  treeData: initialTreeData, 
-  selectedNode, 
-  onNodeSelect 
-}: { 
+export const TreeVisualization = ({
+  treeData: initialTreeData,
+  selectedNode,
+  onNodeSelect
+}: {
   treeData: TreeData;
   selectedNode: Node | null;
   onNodeSelect: (node: Node) => void;
@@ -25,22 +25,22 @@ export const TreeVisualization = ({
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [treeData, setTreeData] = useState<TreeData>(initialTreeData);
-  
+
   const processNode = useCallback((node: Node, level: number, globalIndex: number, accumulator: { nodes: any[], edges: any[], lastIndex: number }, parentId?: string) => {
     // Calculate positions for diagonal layout
     const screenWidth = window.innerWidth;
     const isMobile = screenWidth < 640;
-    
+
     // Adjust spacing based on device size
     const verticalSpacing = isMobile ? 120 : 150;
     const horizontalSpacing = isMobile ? 80 : 120;
-    
+
     // Calculate diagonal positions
     const baseX = screenWidth / 2;
     const x = baseX + (accumulator.lastIndex % 2 === 0 ? -horizontalSpacing : horizontalSpacing);
     const y = accumulator.lastIndex * verticalSpacing + 100;
     accumulator.lastIndex += 1;
-    
+
     // Calculate node size and color based on level
     const getNodeStyle = (level: number) => {
       const diameter = 50;
@@ -54,15 +54,15 @@ export const TreeVisualization = ({
         borderRadius: '50%',
       };
     };
-    
+
     const nodeStyle = getNodeStyle(level);
-    
+
     // Create react-flow node with Git-like positioning
     const flowNode = {
       id: node.id,
       type: 'custom',
       position: { x, y },
-      data: { 
+      data: {
         node,
         isSelected: selectedNode?.id === node.id,
         onSelect: onNodeSelect,
@@ -76,7 +76,7 @@ export const TreeVisualization = ({
         borderRadius: nodeStyle.borderRadius,
       }
     };
-    
+
     // Add edge between parent and current node
     if (parentId) {
       const edgeStyle: React.CSSProperties = {
@@ -94,15 +94,15 @@ export const TreeVisualization = ({
         style: edgeStyle,
       });
     }
-    
+
     accumulator.nodes.push(flowNode);
-    
+
     // Process children
     node.children.forEach((child) => {
       processNode(child, level + 1, accumulator.lastIndex, accumulator, node.id);
     });
   }, [selectedNode, onNodeSelect]);
-  
+
   // Process tree data into nodes and edges
   const updateGraph = useCallback(() => {
     const accumulator = { nodes: [], edges: [], lastIndex: 0 };
@@ -110,21 +110,23 @@ export const TreeVisualization = ({
     setNodes(accumulator.nodes);
     setEdges(accumulator.edges);
   }, [treeData, processNode, setNodes, setEdges]);
-  
+
   // Update graph when tree data changes
   useEffect(() => {
     updateGraph();
   }, [updateGraph]);
-    
+
   // Update nodes and edges when tree data changes
   useEffect(() => {
     updateGraph();
   }, [updateGraph]);
-  
+
   // Update tree data when initialTreeData changes
   useEffect(() => {
     setTreeData(initialTreeData);
   }, [initialTreeData]);
+
+  console.log(edges)
 
   return (
     <ReactFlow

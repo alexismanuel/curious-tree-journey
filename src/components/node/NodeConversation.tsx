@@ -1,6 +1,8 @@
 import { Node } from "@/types/tree";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Home } from "lucide-react";
 
 type Message = {
   content: string;
@@ -11,10 +13,12 @@ export const NodeConversation = ({
   node,
   messages = [],
   onSendMessage,
+  onBackToTree,
 }: {
   node: Node;
   messages: Message[];
   onSendMessage: (message: string) => void;
+  onBackToTree: () => void;
 }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,17 +31,25 @@ export const NodeConversation = ({
   };
 
   return (
-    <div className="flex flex-col h-full max-w-2xl mx-auto px-4 py-6">
+    <div className="flex flex-col h-full max-w-2xl mx-auto px-4 py-6 relative">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-lg font-medium text-center mb-3">{node.title}</h1>
-        <div className="flex items-center justify-center gap-2">
+      <div className="mb-8 relative">
+        <h1 className="text-xl font-semibold text-center">{node.title}</h1>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-0 top-0"
+          onClick={onBackToTree}
+        >
+          <Home className="h-5 w-5" />
+        </Button>
+        <div className="mt-6 flex items-center justify-center gap-2">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
               className={cn(
-                "w-1.5 h-1.5 rounded-full",
-                i === 4 ? "bg-black" : "bg-gray-300"
+                "w-2 h-2 rounded-full transition-all",
+                i === 4 ? "bg-black scale-125" : "bg-gray-200"
               )}
             />
           ))}
@@ -56,10 +68,11 @@ export const NodeConversation = ({
                 : "bg-transparent ml-0"
             )}
           >
-            <p className="text-sm leading-relaxed">{message.content}</p>
+            <p className="text-md leading-relaxed">{message.content}</p>
           </div>
         ))}
       </div>
+
 
       {/* Input */}
       <form onSubmit={handleSubmit} className="mt-6">

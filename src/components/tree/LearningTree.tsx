@@ -20,16 +20,16 @@ export const PathView = ({ learningGoal, treeData: initialTreeData }: { learning
   const [treeData, setTreeData] = useState<TreeData>(initialTreeData);
   const [activeNode, setActiveNode] = useState<Node | null>(null);
   const { toast } = useToast();
-  
+
   // Calculate progress
   const totalNodes = treeData.nodes.length;
   const completedNodes = treeData.nodes.filter(node => node.status === "completed").length;
-  
+
   const handleNodeSelect = (node: Node) => {
     // Find the latest version of the node from treeData
     const latestNode = treeData.nodes.find(n => n.id === node.id);
     if (!latestNode) return;
-    
+
     if (latestNode.status === "locked") {
       toast({
         title: "Node Locked",
@@ -40,7 +40,7 @@ export const PathView = ({ learningGoal, treeData: initialTreeData }: { learning
     }
     setActiveNode(latestNode);
   };
-  
+
   const handleCompleteNode = () => {
     if (!activeNode) return;
 
@@ -54,43 +54,32 @@ export const PathView = ({ learningGoal, treeData: initialTreeData }: { learning
       }
       return node;
     });
-    
+
     // Update the tree data with new nodes
     setTreeData({
       ...treeData,
       nodes: updatedNodes,
       rootNode: updatedNodes.find(node => node.id === treeData.rootNode.id) || treeData.rootNode
     });
-    
+
     toast({
       title: "Node Completed",
       description: "Great job! You can now move on to the next topic.",
     });
   };
-  
+
   return (
     <div className="h-full min-h-[600px] w-full">
-      <div className="h-full flex flex-col">
-        <header className="border-b p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Home className="h-5 w-5" />
-              <h1 className="text-xl font-semibold">{learningGoal}</h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <BookOpen className="h-5 w-5" />
-            </div>
-          </div>
-          <ProgressIndicator completed={completedNodes} total={totalNodes} />
-        </header>
-        
+      <div className="h-full mx-auto flex flex-col">
+		 <header>
+		  <h1 className="text-xl font-semibold text-center">{learningGoal}</h1>
+		 </header>
         <div className="flex-1 p-4 max-w-[2000px] mx-auto w-full relative">
           <AnimatePresence mode="wait">
             {!activeNode ? (
-              <motion.div 
+              <motion.div
                 key="tree"
-                className="h-[calc(100vh-12rem)] glassmorphic rounded-xl p-4 overflow-hidden flex flex-col"
+                className="h-[calc(100vh-12rem)] p-4 overflow-hidden flex flex-col"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -102,23 +91,14 @@ export const PathView = ({ learningGoal, treeData: initialTreeData }: { learning
                 />
               </motion.div>
             ) : (
-              <motion.div 
+              <motion.div
                 key="chat"
-                className="h-[calc(100vh-12rem)] glassmorphic rounded-xl overflow-hidden flex flex-col"
+                className="h-[calc(100vh-12rem)] overflow-hidden flex flex-col"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <div className="flex items-center justify-between p-4 border-b">
-                  <button
-                    onClick={() => setActiveNode(null)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/10 hover:bg-secondary/20 transition-colors text-sm font-medium"
-                  >
-                    <Home className="h-4 w-4" />
-                    <span>Back to Tree</span>
-                  </button>
-                  <h2 className="text-lg font-semibold">{activeNode?.title}</h2>
-                </div>
+
                 <ConversationPanel
                   key={activeNode.id}
                   node={activeNode}
@@ -126,6 +106,7 @@ export const PathView = ({ learningGoal, treeData: initialTreeData }: { learning
                     handleCompleteNode();
                     setActiveNode(null);
                   }}
+                  onBack={() => setActiveNode(null)}
                 />
               </motion.div>
             )}
