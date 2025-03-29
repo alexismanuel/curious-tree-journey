@@ -1,22 +1,18 @@
-
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/AuthContext";
 import { fetchUserPaths, LearningPath, deletePath } from "@/api/paths";
-import { Plus, Trash2, LogOut, ChevronRight, User } from "lucide-react";
+import { Plus, Trash2, ChevronRight } from "lucide-react";
 import LearningPathCreation from "@/components/creation/LearningPathCreation";
 
 const Dashboard = () => {
   const [paths, setPaths] = useState<LearningPath[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -62,34 +58,11 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      navigate("/");
-    } catch (error) {
-      toast({
-        title: "Error signing out",
-        description: "There was a problem signing out.",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-bark-50 to-leaf-50">
       <header className="py-4 px-6 border-b">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold text-bark-900">Learn Anything</h1>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <User className="h-4 w-4 mr-2" />
-              {user?.email}
-            </div>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
-          </div>
         </div>
       </header>
 

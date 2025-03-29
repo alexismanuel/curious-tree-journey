@@ -1,57 +1,38 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import WelcomeScreen from "@/components/welcome/WelcomeScreen";
 import LearningPathCreation from "@/components/creation/LearningPathCreation";
 import MainTreeView from "@/components/tree/MainTreeView";
-import AuthForm from "@/components/auth/AuthForm";
-import { useAuth } from "@/context/AuthContext";
 import { useTreeStore } from "@/store/useTreeStore";
 
 const Index = () => {
-  const [stage, setStage] = useState<"welcome" | "auth" | "creation" | "tree">("welcome");
-  const { user, isLoading: authLoading } = useAuth();
+  const [stage, setStage] = useState<"welcome" | "creation" | "tree">("welcome");
   const { learningGoal, setLearningGoal, createPath } = useTreeStore();
   const location = useLocation();
   const navigate = useNavigate();
 
   // Handle redirect with state from other pages
-  useEffect(() => {
-    if (location.state?.learningGoal) {
-      setLearningGoal(location.state.learningGoal);
-      setStage("creation");
-    }
-  }, [location.state, setLearningGoal]);
-
-  // Redirect to dashboard if already authenticated
-  useEffect(() => {
-    if (!authLoading && user && stage === "auth") {
-      navigate("/dashboard");
-    }
-  }, [authLoading, user, stage, navigate]);
+  if (location.state?.learningGoal) {
+    setLearningGoal(location.state.learningGoal);
+    setStage("creation");
+  }
 
   const handleGetStarted = () => {
-    if (user) {
-      setStage("creation");
-    } else {
-      setStage("auth");
-    }
+    setStage("creation");
   };
 
   const handleCreatePath = async (goal: string) => {
     setLearningGoal(goal);
     
-    if (user) {
-      // If authenticated, create in database and redirect to path view
-      const pathId = await createPath(goal);
-      if (pathId) {
-        navigate(`/path/${pathId}`);
-      } else {
-        setStage("tree");
-      }
+    // For demo, we'll create a path locally and then show it
+    // Before redirecting to the full path view
+    const pathId = await createPath(goal);
+    
+    if (pathId) {
+      navigate(`/path/${pathId}`);
     } else {
-      // If not authenticated, just show demo tree
       setStage("tree");
     }
   };
@@ -80,7 +61,6 @@ const Index = () => {
         transition={{ duration: 0.5 }}
       >
         {stage === "welcome" && <WelcomeScreen onGetStarted={handleGetStarted} />}
-        {stage === "auth" && <AuthForm />}
         {stage === "creation" && <LearningPathCreation onCreatePath={handleCreatePath} />}
         {stage === "tree" && <MainTreeView learningGoal={learningGoal} />}
       </motion.div>

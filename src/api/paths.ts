@@ -8,7 +8,6 @@ export type LearningPath = {
   tree_data: TreeData;
   created_at: string;
   updated_at?: string;
-  user_id?: string;
 };
 
 export const createPath = async (goal: string, treeData: TreeData): Promise<string> => {
@@ -46,16 +45,9 @@ export const fetchPath = async (pathId: string): Promise<LearningPath> => {
 };
 
 export const fetchUserPaths = async (): Promise<LearningPath[]> => {
-  const { data: session } = await supabase.auth.getSession();
-  
-  if (!session.session?.user) {
-    return [];
-  }
-  
   const { data, error } = await supabase
     .from('learning_paths')
     .select('*')
-    .eq('user_id', session.session.user.id)
     .order('created_at', { ascending: false });
     
   if (error) {
