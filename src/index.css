@@ -1,45 +1,60 @@
 
 /* Add this to your existing CSS */
 
-/* Tree Node Styles */
-.node {
-  @apply flex items-center justify-center rounded-full cursor-pointer transition-all;
-}
+@layer components {
+  /* Tree Node Styles */
+  .node {
+    @apply flex items-center justify-center rounded-full cursor-pointer transition-all;
+  }
 
-.node-completed {
-  @apply bg-leaf-500 text-white;
-}
+  .node-completed {
+    @apply bg-leaf-500 text-white;
+  }
 
-.node-active {
-  @apply bg-blossom-500 text-white;
-}
+  .node-active {
+    @apply bg-blossom-500 text-white;
+  }
 
-.node-upcoming {
-  @apply bg-white border border-muted-foreground;
-}
+  .node-upcoming {
+    @apply bg-white border border-muted-foreground;
+  }
 
-.node-locked {
-  @apply bg-gray-200 text-gray-400 cursor-not-allowed;
-}
+  .node-locked {
+    @apply bg-gray-200 text-gray-400 cursor-not-allowed;
+  }
 
-/* Branch Styles */
-.branch {
-  @apply stroke-muted-foreground stroke-[2px];
-}
+  /* Branch Styles */
+  .branch {
+    @apply stroke-muted-foreground stroke-[2px];
+  }
 
-.branch-completed {
-  @apply stroke-leaf-500;
-}
+  .branch-completed {
+    @apply stroke-leaf-500;
+  }
 
-/* Glassmorphic Container */
-.glassmorphic {
-  @apply bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg;
-}
+  /* Glassmorphic Container */
+  .glassmorphic {
+    @apply bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg;
+  }
 
-/* Floating Background Circles */
-.floating-circle {
-  @apply absolute rounded-full blur-3xl opacity-40;
-  animation: float 15s ease-in-out infinite;
+  /* Floating Background Circles */
+  .floating-circle {
+    @apply absolute rounded-full blur-3xl opacity-40;
+    animation: float 15s ease-in-out infinite;
+  }
+
+  /* Chat Bubbles */
+  .chat-bubble {
+    @apply p-3 rounded-lg max-w-xs break-words;
+  }
+
+  .chat-ai {
+    @apply bg-sky-50 text-bark-800 rounded-bl-none;
+  }
+
+  .chat-user {
+    @apply bg-leaf-50 text-bark-800 rounded-br-none;
+  }
 }
 
 @keyframes float {
@@ -55,17 +70,4 @@
   75% {
     transform: translateY(20px) translateX(10px);
   }
-}
-
-/* Chat Bubbles */
-.chat-bubble {
-  @apply p-3 rounded-lg max-w-xs break-words;
-}
-
-.chat-ai {
-  @apply bg-sky-50 text-bark-800 rounded-bl-none;
-}
-
-.chat-user {
-  @apply bg-leaf-50 text-bark-800 rounded-br-none;
 }

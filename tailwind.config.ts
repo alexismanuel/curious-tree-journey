@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -64,6 +65,7 @@ export default {
         },
         // Custom colors for Learn Anything
         leaf: {
+          50: "#F2FCF5",  // Added the 50 shade
           100: "#E0F2E9",
           200: "#C1E5D4",
           300: "#A3D8BF",
@@ -75,6 +77,7 @@ export default {
           900: "#072B1C",
         },
         blossom: {
+          50: "#FDF5FD",  // Added the 50 shade
           100: "#F9E7F8",
           200: "#F4D0F1",
           300: "#EEB8EA",
@@ -86,6 +89,7 @@ export default {
           900: "#2B1A2C",
         },
         bark: {
+          50: "#F8F6F4",  // Added the 50 shade
           100: "#E7E2DE",
           200: "#D0C6BE",
           300: "#B9A99D",
@@ -97,6 +101,7 @@ export default {
           900: "#1B1612",
         },
         sky: {
+          50: "#F0F8FF",  // Added the 50 shade
           100: "#E0F0FF",
           200: "#C1E1FF",
           300: "#A3D2FF",
