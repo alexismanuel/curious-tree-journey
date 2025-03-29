@@ -29,7 +29,7 @@ async function generatePlanningTree(tree: string): Promise<any> {
  * @param create_course - La donnée à transmettre au webhook.
  * @returns La réponse du webhook convertie en JSON.
  */
-async function sendCreateCourse(create_course: string): Promise<any> {
+async function sendCreateCourse(create_course: any): Promise<any> {
     console.log('Envoie de la requête');
     try {
         const response = await fetch('https://hook.eu1.make.com/p7esqd79lmis8i55kpesi2fq6e4nkizy', {
@@ -37,7 +37,7 @@ async function sendCreateCourse(create_course: string): Promise<any> {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ create_course })
+            body: JSON.stringify({ course: create_course })
         });
 
         // Vérification du statut de la réponse
@@ -45,10 +45,12 @@ async function sendCreateCourse(create_course: string): Promise<any> {
             throw new Error(`Erreur HTTP : statut ${response.status}`);
         }
 
-        // Conversion de la réponse en JSON et retour
-        const data = await response.json();
-        console.log('Réponse du webhook:', data);
-        return data;
+        // On récupère le texte brut de la réponse
+        const responseText = await response.text();
+        console.log('Réponse du webhook:', responseText);
+        
+        // On retourne le texte tel quel
+        return responseText;
     } catch (error) {
         console.error('Erreur lors de l\'appel du webhook:', error);
         throw error;

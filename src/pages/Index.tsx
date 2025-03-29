@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import LearningPathCreation from "@/components/creation/LearningPathCreation";
 import { PersonalizationForm } from "@/components/creation/PersonalizationForm";
 import { PathView } from "@/components";
-import { generateInitialTree } from "@/lib/tree-generator";
+import { generateTreeFromCourseData } from "@/lib/tree-generator";
 import { ProgressDots } from "@/components/ui/progress-dots";
 import { generatePlanningTree,sendCreateCourse } from "@/api/webhook";
 import { saveToLocalStorage } from "@/utils/localStorage";
@@ -32,10 +32,12 @@ const Index = () => {
       
       // Attendre la réponse de l'API
       const response = await generatePlanningTree(personalizedGoal);
+      const courseData = await sendCreateCourse(response);
+      console.log("Course Data:", courseData);
       saveToLocalStorage("courseData", response);
       
       // Generate a tree locally without persisting
-      const initialTree = generateInitialTree(response);
+      const initialTree = generateTreeFromCourseData(response);
       setTreeData(initialTree);
       
       // Show the tree visualization

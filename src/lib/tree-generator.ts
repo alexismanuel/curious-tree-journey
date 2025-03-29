@@ -1,45 +1,38 @@
 import { Node, TreeData } from "@/types/tree";
 
 /**
- * Interface représentant la structure des données de cours
+ * Interface représentant la structure du nouveau format de cours
  */
-interface CourseData {
-  titre: string;
+interface NewCourseFormat {
+  id: string;
+  title: string;
   description: string;
-  niveau: string;
-  chapitres: Chapitre[];
-}
-
-/**
- * Interface représentant la structure d'un chapitre
- */
-interface Chapitre {
-  Titre: string;
-  Contenu: {
-    Introduction: string;
-    "Objectifs d'apprentissage": string[];
-    "Contenu principal": string[];
-    "Activités et exercices"?: string[];
-    "Ressources supplémentaires"?: string[];
-    "Evaluation"?: string[];
-    "Évaluation"?: string[];
-    Conclusion: string;
+  context: {
+    niveau: string;
+    objectif: string;
+    délai: string;
+    préférences: string;
     [key: string]: any; // Pour gérer d'autres clés potentielles
   };
+  chapters: Chapter[];
 }
 
 /**
- * Génère une structure d'arbre linéaire à partir des données de cours fournies
- * @param courseData - Les données de cours à transformer en arbre
- * @param goal - L'objectif d'apprentissage (utilisé si le titre du cours est vide)
+ * Interface représentant un chapitre dans le nouveau format
+ */
+interface Chapter {
+  id: string;
+  title: string;
+  prerequisites: string[];
+  [key: string]: any; // Pour gérer d'autres clés potentielles
+}
+
+/**
+ * Génère une structure d'arbre hiérarchique à partir des données de cours au nouveau format
+ * @param courseData - Les données de cours au nouveau format à transformer en arbre
  * @returns La structure d'arbre générée
  */
-export const generateTreeFromCourseData = (courseData: CourseData, goal?: string): TreeData => {
-  // Utiliser le titre du cours s'il existe, sinon utiliser un titre par défaut
-  const courseTitle = courseData.titre.trim() || (goal && typeof goal === 'string' 
-    ? `Introduction à Learn Anything`
-    : "Introduction au cours");
-  
+export const generateTreeFromCourseData = (courseData: NewCourseFormat): TreeData => {
   // Créer le nœud racine
   const rootNode: Node = {
     id: "root",
@@ -49,33 +42,52 @@ export const generateTreeFromCourseData = (courseData: CourseData, goal?: string
     children: []
   };
   
-  // Ajouter les chapitres comme enfants directs du nœud racine dans un ordre linéaire
-  courseData.chapitres.forEach((chapitre, index) => {
-    // Utiliser directement le titre du chapitre ou générer un titre par défaut
-    const chapitreTitle = chapitre.Titre.trim() || `Chapitre ${index + 1}`;
-    
-    // Déterminer le statut du chapitre en fonction de sa position
-    const status = index === 0 ? "upcoming" : "locked";
-    
-    // Créer le nœud du chapitre avec un titre dynamique
-    const chapitreNode: Node = {
-      id: `chapitre-${index + 1}`,
-      title: chapitreTitle,
-      description: "", // Pas de description pour se concentrer uniquement sur le titre
-      status: status,
-      children: [],
-      // Ajouter des métadonnées supplémentaires pour enrichir le nœud
+  // Créer un dictionnaire pour accéder facilement aux nœuds par ID
+  const nodeMap: Record<string, Node> = {
+    "root": rootNode
+  };
+  
+  // Créer les nœuds pour chaque chapitre
+  courseData.chapters.forEach((chapter) => {
+    const chapterNode: Node = {
+      id: chapter.id,
+      title: chapter.title,
+      description: "", // Pas de description détaillée dans le nouveau format
+      status: "locked", // Par défaut tous les chapitres sont verrouillés
+      children: []
     };
     
-    // Ajouter le chapitre comme enfant du nœud racine
-    rootNode.children.push(chapitreNode);
+    // Ajouter le nœud au dictionnaire
+    nodeMap[chapter.id] = chapterNode;
+  });
+  
+  // Établir les relations parent-enfant en fonction des prérequis
+  courseData.chapters.forEach((chapter) => {
+    const chapterNode = nodeMap[chapter.id];
+    
+    if (chapter.prerequisites.length === 0) {
+      // Chapitre sans prérequis, donc directement rattaché à la racine
+      rootNode.children.push(chapterNode);
+      // Le premier chapitre sans prérequis sera en "upcoming"
+      if (chapterNode.status === "locked" && rootNode.children.length === 1) {
+        chapterNode.status = "upcoming";
+      }
+    } else {
+      // Chapitre avec prérequis, on l'attache au dernier prérequis
+      const lastPrereqId = chapter.prerequisites[chapter.prerequisites.length - 1];
+      const parentNode = nodeMap[lastPrereqId];
+      if (parentNode) {
+        parentNode.children.push(chapterNode);
+      } else {
+        console.warn(`Parent node with ID ${lastPrereqId} not found for chapter ${chapter.id}`);
+        // Fallback: attacher à la racine
+        rootNode.children.push(chapterNode);
+      }
+    }
   });
   
   // Créer la liste complète de tous les nœuds
-  const allNodes = [
-    rootNode,
-    ...rootNode.children
-  ];
+  const allNodes = Object.values(nodeMap);
   
   return {
     rootNode,
@@ -84,72 +96,27 @@ export const generateTreeFromCourseData = (courseData: CourseData, goal?: string
 };
 
 /**
- * Génère un arbre initial basé sur l'objectif d'apprentissage
- * Fonction maintenue pour compatibilité avec le code existant
- * @param goal - L'objectif d'apprentissage
- * @returns Un arbre par défaut si aucune donnée de cours n'est disponible
- */
-export const generateInitialTree = (goal?: string): TreeData => {
-  // S'assurer que goal est une chaîne de caractères
-  const goalString = goal && typeof goal === 'string' ? goal : "Course";
-  // Cette fonction est maintenue pour compatibilité
-  // Dans un cas réel, elle pourrait appeler generateTreeFromCourseData avec des données par défaut
-  
-  const rootNode: Node = {
-    id: "root",
-    title: "Introduction to " + goalString.split(" ").slice(-1)[0],
-    description: "Core concepts and foundations",
-    status: "active",
-    children: [
-      {
-        id: "chapitre-1",
-        title: "Chapitre 1",
-        description: "Introduction au premier chapitre",
-        status: "upcoming",
-        children: []
-      },
-      {
-        id: "chapitre-2",
-        title: "Chapitre 2",
-        description: "Introduction au deuxième chapitre",
-        status: "locked",
-        children: []
-      },
-      {
-        id: "chapitre-3",
-        title: "Chapitre 3",
-        description: "Introduction au troisième chapitre",
-        status: "locked",
-        children: []
-      }
-    ]
-  };
-  
-  return {
-    rootNode,
-    nodes: [
-      rootNode,
-      ...rootNode.children
-    ]
-  };
-};
-
-/**
- * Fonction utilitaire pour convertir les données JSON brutes en objet CourseData
+ * Fonction utilitaire pour convertir les données JSON brutes en objet NewCourseFormat
  * @param jsonData - Les données JSON à convertir
  * @returns Les données de cours converties
  */
-export const parseCourseData = (jsonData: string): CourseData => {
+export const parseCourseData = (jsonData: string): NewCourseFormat => {
   try {
-    return JSON.parse(jsonData) as CourseData;
+    return JSON.parse(jsonData) as NewCourseFormat;
   } catch (error) {
     console.error("Erreur lors de l'analyse des données de cours:", error);
     // Retourner une structure vide en cas d'erreur
     return {
-      titre: "",
+      id: "",
+      title: "",
       description: "",
-      niveau: "",
-      chapitres: []
+      context: {
+        niveau: "",
+        objectif: "",
+        délai: "",
+        préférences: ""
+      },
+      chapters: []
     };
   }
 };
