@@ -2,44 +2,56 @@ import { motion } from "framer-motion";
 import { Check, Lock, ChevronRight } from "lucide-react";
 import { Node } from "@/types/tree";
 
-export const CustomNode = ({ data }: { data: { node: Node, isSelected: boolean, onSelect: (node: Node) => void } }) => {
+export const CustomNode = ({ data }: { data: { node: Node, isSelected: boolean, onSelect: (node: Node) => void, style: { width: number, height: number, scale: number, primaryColor: string } } }) => {
   const { node, isSelected, onSelect } = data;
+  const { style } = data;
   
-  let statusClass = "node-upcoming";
-  let statusIcon = <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />;
-  
-  if (node.status === "completed") {
-    statusClass = "node-completed";
-    statusIcon = <Check className="h-3 w-3 sm:h-4 sm:w-4" />;
-  } else if (node.status === "active") {
-    statusClass = "node-active";
-    statusIcon = <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />;
-  } else if (node.status === "locked") {
-    statusClass = "node-locked";
-    statusIcon = <Lock className="h-3 w-3 sm:h-4 sm:w-4" />;
-  }
-  
-  const screenWidth = window.innerWidth;
-  const nodeSize = {
-    small: { width: '36px', height: '36px' },
-    large: { width: screenWidth >= 1536 ? '56px' : '48px', height: screenWidth >= 1536 ? '56px' : '48px' },
-    selected: { width: screenWidth >= 1536 ? '64px' : '44px', height: screenWidth >= 1536 ? '64px' : '44px' }
+  // Define status-based styles
+  const getStatusStyles = () => {
+    const baseStyles = {
+      textColor: 'text-gray-700'
+    };
+    
+    if (node.status === "completed") {
+      return {
+        textColor: 'text-gray-700'
+      };
+    } else if (node.status === "active") {
+      return {
+        textColor: 'text-gray-700'
+      };
+    } else if (node.status === "locked") {
+      return {
+        textColor: 'text-gray-500'
+      };
+    }
+    
+    return baseStyles;
   };
+  
+  const statusStyles = getStatusStyles();
   
   return (
     <motion.div
-      className={`node ${statusClass} cursor-pointer`}
+      className={`relative flex flex-col p-3 sm:p-4 bg-white border border-gray-200 ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
       style={{ 
-        width: isSelected ? nodeSize.selected.width : window.innerWidth < 640 ? nodeSize.small.width : nodeSize.large.width,
-        height: isSelected ? nodeSize.selected.height : window.innerWidth < 640 ? nodeSize.small.height : nodeSize.large.height
+        width: `${style.width}px`,
+        height: `${style.height}px`,
+        transform: `scale(${style.scale})`,
+        transformOrigin: 'center center'
       }}
       onClick={() => onSelect(node)}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ 
+        scale: style.scale * 1.02,
+        transition: { duration: 0.2 }
+      }}
+      whileTap={{ 
+        scale: style.scale * 0.98,
+        transition: { duration: 0.1 }
+      }}
     >
-      {statusIcon}
-      <div className="absolute top-12 sm:top-16 w-32 sm:w-40 text-center" style={{ left: '-50%' }}>
-        <span className={`text-[10px] sm:text-xs font-medium truncate block ${isSelected || node.status === "completed" ? 'opacity-100' : 'opacity-70'}`}>
+      <div className="flex items-center justify-center w-full h-full">
+        <span className={`font-semibold ${statusStyles.textColor} text-sm sm:text-base text-center`}>
           {node.title}
         </span>
       </div>
