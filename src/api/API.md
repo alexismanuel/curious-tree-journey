@@ -1,0 +1,135 @@
+# Learning Path Generator API
+
+API service that generates personalized learning paths using LLMs.
+
+## Quick Start
+
+1. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. Set environment variables:
+```bash
+export MISTRAL_API_KEY=your_api_key_here
+```
+
+3. Run the server:
+```bash
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+```
+
+## API Endpoints
+
+### 1. Generate Context Question
+Generates a personalized question to gather learning context.
+
+```http
+POST /api/context
+Content-Type: application/json
+
+{
+    "subject": "string"  // What you want to learn
+}
+
+Response: string (the context question)
+```
+
+### 2. Generate Learning Plan
+Generates a structured learning plan based on subject and context.
+
+```http
+POST /api/plan
+Content-Type: application/json
+
+{
+    "subject": "string",  // What you want to learn
+    "context": "string"   // Your learning context
+}
+
+Response: LearningPlan object
+```
+
+### 3. Generate Chapter Contents
+Generates detailed content for each chapter in a learning plan.
+
+```http
+POST /api/chapters
+Content-Type: application/json
+
+{
+    // LearningPlan object
+}
+
+Response: LearningPlan object with chapter contents
+```
+
+### 4. Generate Complete Learning Path
+Complete pipeline that generates everything in one call.
+
+```http
+POST /api/generate
+Content-Type: application/json
+
+{
+    "subject": "string",  // What you want to learn
+    "context": "string"   // Your learning context
+}
+
+Response: Complete LearningPlan object with chapters
+```
+
+## Response Models
+
+### LearningPlan
+```json
+{
+    "id": "string",
+    "title": "string",
+    "description": "string",
+    "context": "string",
+    "chapters": [
+        {
+            "id": "string",
+            "title": "string",
+            "prerequisites": ["string"],
+            "content": {
+                "explanation": "string",
+                "tips": "string",
+                "resources": ["string"]
+            }
+        }
+    ]
+}
+```
+
+## Deployment
+
+### Docker
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+Build and run:
+```bash
+docker build -t learning-path-api .
+docker run -e MISTRAL_API_KEY=your_key -p 8000:8000 learning-path-api
+```
+
+### Production Tips
+1. Use HTTPS in production
+2. Set appropriate CORS origins
+3. Add rate limiting
+4. Use environment variables for configuration
+5. Consider adding authentication
+
+## Interactive Documentation
+When the server is running, visit:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc

@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+learning_plan.json
+
+final_output.json
+
+src/api/__pycache__/

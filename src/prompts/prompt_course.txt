@@ -1,0 +1,36 @@
+Tu es un assistant pédagogique expert.
+
+À partir du plan de cours suivant :
+
+{learning_plan}
+
+Génère un contenu détaillé pour chaque chapitre.
+
+Format de réponse : un objet JSON sans texte autour.
+
+Structure attendue :
+
+{{
+  "course_id": "identifiant_du_cours",
+  "chapters": [
+    {{
+      "id": "c1",
+      "content": [
+        {{
+          "type": "text",
+          "value": "Contenu textuel expliquant le concept"
+        }},
+        {{
+          "type": "exercise",
+          "title": "Titre de l'exercice",
+          "description": "Description détaillée de l'exercice",
+          "expected_duration": "10min"
+        }},
+        {{
+          "type": "tip",
+          "value": "Conseil pratique pour faciliter l'apprentissage"
+        }}
+      ]
+    }}
+  ]
+}}
