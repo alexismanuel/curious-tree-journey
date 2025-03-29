@@ -59,35 +59,35 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
 
   return (
     <motion.div
-      className="max-w-3xl w-full mx-auto glassmorphic rounded-2xl p-8 md:p-12"
+      className="max-w-3xl w-full mx-auto glassmorphic rounded-2xl p-4 sm:p-8 md:p-12"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
       <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-3 text-bark-900">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3 text-bark-900">
           Que voulez-vous apprendre ?
         </h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-muted-foreground text-base sm:text-lg px-4 sm:px-0">
           Entrer un sujet, une compétence ou un thème pour créer votre parcours d'apprentissage personnalisé
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="mb-8">
-        <div className="flex gap-2">
+      <form onSubmit={handleSubmit} className="mb-6 sm:mb-8 px-2 sm:px-0">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
             <Input
               value={goal}
               onChange={(e) => setGoal(e.target.value)}
               placeholder="e.g., Learn JavaScript fundamentals"
-              className="pl-10 py-6 text-lg"
+              className="pl-10 py-4 sm:py-6 text-base sm:text-lg"
             />
           </div>
           <Button 
             type="submit" 
             disabled={isCreating} 
-            className="bg-leaf-500 hover:bg-leaf-600 text-white"
+            className="bg-leaf-500 hover:bg-leaf-600 text-white py-4 sm:py-6 mt-2 sm:mt-0"
           >
             {isCreating ? (
               <motion.div
