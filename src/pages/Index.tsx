@@ -1,21 +1,31 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import WelcomeScreen from "@/components/welcome/WelcomeScreen";
 import LearningPathCreation from "@/components/creation/LearningPathCreation";
+import { PersonalizationForm } from "@/components/creation/PersonalizationForm";
 import { PathView } from "@/components";
 import { generateInitialTree } from "@/lib/tree-generator";
+import { ProgressDots } from "@/components/ui/progress-dots";
 
 const Index = () => {
-  const [stage, setStage] = useState<"creation" | "tree">("creation");
+  const [stage, setStage] = useState<"creation" | "personalization" | "tree">("creation");
   const [learningGoal, setLearningGoal] = useState<string>("");
   const [treeData, setTreeData] = useState<any>(null);
 
   const handleCreatePath = (goal: string) => {
     setLearningGoal(goal);
-    
+    setStage("personalization");
+  };
+
+  const handlePersonalization = async (details: string) => {
+    // Placeholder for webhook response
+    const mockResponse = {
+      context: `Tu veux apprendre ${learningGoal}, c'est super ! Dis m'en plus sur tes objectifs`,
+      details: `Tu peux préciser ton niveau actuel, le style de musique que tu aimes, une chanson que tu veux jouer ou ton objectif (jouer en groupe, te détendre, etc.).`
+    };
+
     // Generate a tree locally without persisting
-    const initialTree = generateInitialTree(goal);
+    const initialTree = generateInitialTree(learningGoal);
     setTreeData(initialTree);
     
     // Show the tree visualization
@@ -31,6 +41,16 @@ const Index = () => {
         />
       </div>
 
+      {/* Progress dots */}
+      {(stage === "creation" || stage === "personalization") && (
+        <div className="absolute top-12 left-1/2 -translate-x-1/2 z-20">
+          <ProgressDots 
+            totalSteps={2} 
+            currentStep={stage === "creation" ? 1 : 2} 
+          />
+        </div>
+      )}
+
       {/* Content */}
       <motion.div 
         className="flex-1 flex items-center justify-center px-4 relative z-10"
@@ -39,6 +59,7 @@ const Index = () => {
         transition={{ duration: 0.5 }}
       >
         {stage === "creation" && <LearningPathCreation onCreatePath={handleCreatePath} />}
+        {stage === "personalization" && <PersonalizationForm goal={learningGoal} onSubmit={handlePersonalization} />}
         {stage === "tree" && <PathView learningGoal={learningGoal} treeData={treeData} />}
       </motion.div>
     </div>
