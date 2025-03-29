@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TreeVisualization from "./TreeVisualization";
@@ -9,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { ChevronLeft, Home, Save, Share } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateInitialTree } from "@/lib/tree-generator";
-import { Node, TreeData } from "@/types/tree";
+import { Node, TreeData, NodeStatus } from "@/types/tree";
 
 interface MainTreeViewProps {
   learningGoal: string;
@@ -22,7 +21,6 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Simulate API call to generate tree
     const timer = setTimeout(() => {
       const initialTree = generateInitialTree(learningGoal);
       setTreeData(initialTree);
@@ -46,14 +44,13 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
     setSelectedNode(node);
     
     if (node.status === "upcoming") {
-      // Update node status to active
       setTreeData(prev => {
         if (!prev) return prev;
         
         const updateNodeStatus = (nodes: Node[]): Node[] => {
           return nodes.map(n => {
             if (n.id === node.id) {
-              return { ...n, status: "active" };
+              return { ...n, status: "active" as NodeStatus };
             }
             
             if (n.children) {
@@ -68,7 +65,7 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
           ...prev,
           nodes: updateNodeStatus(prev.nodes),
           rootNode: prev.rootNode.id === node.id 
-            ? { ...prev.rootNode, status: "active" } 
+            ? { ...prev.rootNode, status: "active" as NodeStatus } 
             : { ...prev.rootNode, children: updateNodeStatus(prev.rootNode.children) }
         };
       });
@@ -78,24 +75,22 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
   const completeCurrentNode = () => {
     if (!selectedNode) return;
     
-    // Update the selected node to completed
     setTreeData(prev => {
       if (!prev) return prev;
       
       const updateNodeStatus = (nodes: Node[]): Node[] => {
         return nodes.map(n => {
           if (n.id === selectedNode.id) {
-            return { ...n, status: "completed" };
+            return { ...n, status: "completed" as NodeStatus };
           }
           
-          // Unlock next nodes if they are children of the completed node
           if (n.id === selectedNode.id && n.children) {
             return {
               ...n,
-              status: "completed",
+              status: "completed" as NodeStatus,
               children: n.children.map(child => ({
                 ...child,
-                status: child.status === "locked" ? "upcoming" : child.status
+                status: child.status === "locked" ? ("upcoming" as NodeStatus) : child.status
               }))
             };
           }
@@ -109,7 +104,7 @@ const MainTreeView = ({ learningGoal }: MainTreeViewProps) => {
       };
       
       const updatedRootNode = prev.rootNode.id === selectedNode.id 
-        ? { ...prev.rootNode, status: "completed" } 
+        ? { ...prev.rootNode, status: "completed" as NodeStatus } 
         : { ...prev.rootNode, children: updateNodeStatus(prev.rootNode.children) };
       
       return {
