@@ -1,12 +1,5 @@
 
-import { Node } from "@/types/tree";
-
-interface Message {
-  id: string;
-  sender: "ai" | "user";
-  content: string;
-  timestamp: Date;
-}
+import { Node, Message } from "@/utils/api";
 
 // Generate initial conversation messages based on the node
 export const generateInitialMessages = (node: Node): Message[] => {
@@ -19,7 +12,7 @@ export const generateInitialMessages = (node: Node): Message[] => {
         id: "1",
         sender: "ai",
         content: `You've already mastered "${node.title}". Would you like to review this topic again or continue to the next one?`,
-        timestamp: now
+        timestamp: now.toISOString()
       }
     ];
   }
@@ -30,7 +23,7 @@ export const generateInitialMessages = (node: Node): Message[] => {
       id: "1",
       sender: "ai",
       content: `Welcome to "${node.title}"! ${node.description}. What would you like to learn about this topic?`,
-      timestamp: now
+      timestamp: now.toISOString()
     }
   ];
 };

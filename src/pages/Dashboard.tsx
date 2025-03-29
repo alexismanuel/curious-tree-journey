@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -5,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { fetchUserPaths, LearningPath, deletePath } from "@/api/paths";
 import { Plus, Trash2, ChevronRight } from "lucide-react";
 import LearningPathCreation from "@/components/creation/LearningPathCreation";
+import { fetchUserPaths, LearningPath, deletePath } from "@/utils/api";
 
 const Dashboard = () => {
   const [paths, setPaths] = useState<LearningPath[]>([]);

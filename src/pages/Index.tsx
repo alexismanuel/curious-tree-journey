@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import WelcomeScreen from "@/components/welcome/WelcomeScreen";
 import LearningPathCreation from "@/components/creation/LearningPathCreation";
-import MainTreeView from "@/components/tree/MainTreeView";
-import { useTreeStore } from "@/store/useTreeStore";
+import { useTreeStore } from "@/utils/api";
+import { PathView } from "@/components/LearningTree";
 
 const Index = () => {
   const [stage, setStage] = useState<"welcome" | "creation" | "tree">("welcome");
@@ -62,7 +62,7 @@ const Index = () => {
       >
         {stage === "welcome" && <WelcomeScreen onGetStarted={handleGetStarted} />}
         {stage === "creation" && <LearningPathCreation onCreatePath={handleCreatePath} />}
-        {stage === "tree" && <MainTreeView learningGoal={learningGoal} />}
+        {stage === "tree" && <PathView />}
       </motion.div>
     </div>
   );
