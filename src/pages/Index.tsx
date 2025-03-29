@@ -32,6 +32,7 @@ const Index = () => {
       
       // Attendre la réponse de l'API
       const response = await generatePlanningTree(personalizedGoal);
+      setLearningGoal(response.title)
       const courseData = await sendCreateCourse(response);
       console.log("Course Data:", courseData);
       saveToLocalStorage("courseData", response);
