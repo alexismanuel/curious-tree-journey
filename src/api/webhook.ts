@@ -1,18 +1,11 @@
-/**
- * Envoie une requête POST vers le webhook de Make avec la variable `create_course`
- * et retourne la réponse du webhook.
- *
- * @param create_course - La donnée à transmettre au webhook.
- * @returns La réponse du webhook convertie en JSON.
- */
-async function sendCreateCourse(create_course: string): Promise<any> {
+async function generatePlanningTree(tree: string): Promise<any> {
     try {
         const response = await fetch('https://hook.eu1.make.com/ihmym1n82oq1hqb7sa83fa5n5mwa8v48', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ create_course })
+            body: JSON.stringify({ tree })
         });
 
         // Vérification du statut de la réponse
@@ -29,10 +22,70 @@ async function sendCreateCourse(create_course: string): Promise<any> {
         throw error;
     }
 }
+/**
+ * Envoie une requête POST vers le webhook de Make avec la variable `create_course`
+ * et retourne la réponse du webhook.
+ *
+ * @param create_course - La donnée à transmettre au webhook.
+ * @returns La réponse du webhook convertie en JSON.
+ */
+async function sendCreateCourse(create_course: any): Promise<any> {
+    // Affichages de débogage détaillés
+    console.log('Envoie de la requête');
+    console.log('Type de create_course:', typeof create_course);
+    
+    // Si c'est une chaîne, essayons de voir si c'est déjà du JSON
+    if (typeof create_course === 'string') {
+        console.log('create_course est une chaîne de caractères');
+        try {
+            // Vérifions si c'est du JSON valide
+            JSON.parse(create_course);
+            console.log('La chaîne est un JSON valide');
+        } catch (e) {
+            console.log('La chaîne n\'est PAS un JSON valide:', e.message);
+        }
+    }
+    
+    // Préparons le corps de la requête avec des logs
+    const requestBody = JSON.stringify({ course: create_course });
+    console.log('Corps de la requête:', requestBody);
+    
+    try {
+        const response = await fetch('https://hook.eu1.make.com/p7esqd79lmis8i55kpesi2fq6e4nkizy', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: requestBody
+        });
+
+        console.log('Statut de la réponse:', response.status);
+        
+        // On récupère d'abord le texte brut pour voir s'il y a un problème
+        const rawText = await response.text();
+        console.log('Réponse brute:', rawText);
+        
+        // Puis on essaie de le parser en JSON si possible
+        let data;
+        try {
+            data = JSON.parse(rawText);
+            console.log('Réponse JSON parsée:', data);
+        } catch (parseError) {
+            console.error('Impossible de parser la réponse en JSON:', parseError);
+            // On retourne quand même le texte brut
+            return rawText;
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('Erreur lors de l\'appel du webhook:', error);
+        throw error;
+    }
+}
 
 async function chatWithAI(context : string, message: string): Promise<any> {
     try {
-        const response = await fetch('https://hook.eu1.make.com/ihmym1n82oq1hqb7sa83fa5n5mwa8v48', {
+        const response = await fetch('https://hook.eu1.make.com/mo2jx6wnssgv9nu4r3wqxx9t2molek13', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -46,7 +99,8 @@ async function chatWithAI(context : string, message: string): Promise<any> {
         }
 
         // Conversion de la réponse en JSON et retour
-        const data = await response.json();
+        const jsonResponse = await response.json();
+        const data = jsonResponse.reponse;
         console.log('Réponse du webhook:', data);
         return data;
     } catch (error) {
@@ -55,4 +109,4 @@ async function chatWithAI(context : string, message: string): Promise<any> {
     }
 }
 
-export { sendCreateCourse, chatWithAI };
+export { sendCreateCourse, chatWithAI, generatePlanningTree };

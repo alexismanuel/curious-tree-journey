@@ -1,16 +1,19 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import LearningPathCreation from "@/components/creation/LearningPathCreation";
 import { PersonalizationForm } from "@/components/creation/PersonalizationForm";
 import { PathView } from "@/components";
-import { generateInitialTree } from "@/lib/tree-generator";
+import { generateTreeFromCourseData } from "@/lib/tree-generator";
 import { ProgressDots } from "@/components/ui/progress-dots";
+import { generatePlanningTree,sendCreateCourse } from "@/api/webhook";
+import { saveToLocalStorage } from "@/utils/localStorage";
+import LoadingBar from "@/components/ui/LoadingBar";
 
 const Index = () => {
-  const [stage, setStage] = useState<"creation" | "personalization" | "tree">("creation");
+  const [stage, setStage] = useState<"creation" | "personalization" | "tree" | "loading">("creation");
   const [learningGoal, setLearningGoal] = useState<string>("");
   const [treeData, setTreeData] = useState<any>(null);
+  const [loadingMessage, setLoadingMessage] = useState<string>("Génération de votre parcours d'apprentissage...");
 
   const handleCreatePath = (goal: string) => {
     setLearningGoal(goal);
@@ -18,48 +21,67 @@ const Index = () => {
   };
 
   const handlePersonalization = async (details: string) => {
-    // Placeholder for webhook response
-    const mockResponse = {
-      context: `Tu veux apprendre ${learningGoal}, c'est super ! Dis m'en plus sur tes objectifs`,
-      details: `Tu peux préciser ton niveau actuel, le style de musique que tu aimes, une chanson que tu veux jouer ou ton objectif (jouer en groupe, te détendre, etc.).`
-    };
+    // Passer à l'étape de chargement
+    setStage("loading");
+    setLoadingMessage("Génération de votre parcours d'apprentissage personnalisé...");
 
-    // Generate a tree locally without persisting
-    const initialTree = generateInitialTree(learningGoal);
-    setTreeData(initialTree);
-    
-    // Show the tree visualization
-    setStage("tree");
+    try {
+      // Fusionne le but d'apprentissage et les détails de personnalisation
+      const personalizedGoal = `${learningGoal} ${details}`;
+      console.log("Personalized Goal:", personalizedGoal);
+      
+      // Attendre la réponse de l'API
+      const response = await generatePlanningTree(personalizedGoal);
+      setLearningGoal(response.title)
+      const courseData = await sendCreateCourse(response);
+      console.log("Course Data:", courseData);
+      saveToLocalStorage("courseData", response);
+      
+      // Generate a tree locally without persisting
+      const initialTree = generateTreeFromCourseData(response);
+      setTreeData(initialTree);
+      
+      // Show the tree visualization
+      setStage("tree");
+    } catch (error) {
+      console.error("Error creating course:", error);
+      setLoadingMessage("Une erreur est survenue. Veuillez réessayer.");
+      // Après un délai, revenir à l'étape de personnalisation
+      setTimeout(() => {
+        setStage("personalization");
+      }, 3000);
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-background overflow-hidden">
       {/* Minimal background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div 
-          className="absolute left-1/2 top-0 -translate-x-1/2 w-[800px] h-[800px] bg-muted rounded-full blur-3xl opacity-10 -z-10" 
+      <div className="inset-0 overflow-hidden">
+        <div
+          className="-translate-x-1/2 w-full h-full bg-muted rounded-full blur-3xl opacity-10 -z-10"
         />
       </div>
 
       {/* Progress dots */}
       {(stage === "creation" || stage === "personalization") && (
         <div className="fixed top-12 left-1/2 -translate-x-1/2 z-20">
-          <ProgressDots 
-            totalSteps={2} 
-            currentStep={stage === "creation" ? 1 : 2} 
+          <ProgressDots
+            totalSteps={2}
+            currentStep={stage === "creation" ? 1 : 2}
           />
         </div>
       )}
 
       {/* Content */}
-      <motion.div 
-        className="flex-1 flex items-start sm:items-center justify-center px-4 relative z-10 pt-32 sm:pt-0"
+      <motion.div
+        className="flex-1 flex items-start sm:items-center justify-center px-4 relative z-10 pt-4 sm:pt-0"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
         {stage === "creation" && <LearningPathCreation onCreatePath={handleCreatePath} />}
         {stage === "personalization" && <PersonalizationForm goal={learningGoal} onSubmit={handlePersonalization} />}
+        {stage === "loading" && <LoadingBar message={loadingMessage} color="indigo" width={350} />}
         {stage === "tree" && <PathView learningGoal={learningGoal} treeData={treeData} />}
       </motion.div>
     </div>

@@ -1,38 +1,61 @@
 import { motion } from "framer-motion";
 import { Node } from "@/types/tree";
+import { Handle, Position } from "@xyflow/react";
 
 export const CustomNode = ({ data }: { data: { node: Node, isSelected: boolean, onSelect: (node: Node) => void, style: { width: number, height: number, scale: number, primaryColor: string }, index: number } }) => {
   const { node, isSelected, onSelect, index } = data;
   const isEven = index % 2 === 0;
-  
+
   return (
-    <div 
+    <div
       className="relative group"
       onClick={() => onSelect(node)}
     >
       {/* Title */}
-      <div 
-        className={`absolute ${isEven ? 'right-full mr-3' : 'left-full ml-3'} top-1/2 -translate-y-1/2 text-sm font-medium whitespace-nowrap`}
+      <div
+        className={`absolute ${isEven ? 'right-full mr-4' : 'left-full ml-4'} top-1/2 -translate-y-1/2 text-sm font-medium`}
+        style={{
+          fontSize: '14px',
+          width: '140px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: 'flex',
+          flexDirection: isEven ? 'row-reverse' : 'row',
+          textAlign: isEven ? 'right' : 'left'
+        }}
       >
         {node.title}
       </div>
 
       {/* Circle */}
       <motion.div
-        className={`w-12 h-12 rounded-full transition-all duration-200 ${isSelected ? 'ring-2 ring-primary' : ''}`}
+        className={`w-12 h-12 rounded-full transition-all duration-200 ${isSelected ? 'ring-2 ring-primary' : ''} relative`}
         style={{
           background: '#F0F0F0',
           border: '2px solid #000000',
         }}
-        whileHover={{ 
+        whileHover={{
           scale: 1.05,
           transition: { duration: 0.2 }
         }}
-        whileTap={{ 
+        whileTap={{
           scale: 0.95,
           transition: { duration: 0.1 }
         }}
-      />
+      >
+        <Handle
+          id="top"
+          type="target"
+          position={Position.Top}
+          style={{ opacity: 0 }}
+        />
+        <Handle
+          id="bottom"
+          type="source"
+          position={Position.Bottom}
+          style={{ opacity: 0 }}
+        />
+      </motion.div>
     </div>
   );
 };
