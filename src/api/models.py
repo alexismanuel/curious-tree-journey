@@ -13,8 +13,11 @@ class LLMParsingError(APIError):
     pass
 
 class ChapterContent(BaseModel):
-    explanation: str = Field(..., description="Detailed explanation of the chapter content")
-    tips: str = Field(..., description="Practical tips and advice for learning")
+    introduction: str = Field(..., description="Chapter objectives and importance")
+    theory: str = Field(..., description="Clear explanation of essential concepts")
+    guided_practice: str = Field(..., description="Step-by-step guided activity or tutorial")
+    challenge: str = Field(..., description="Independent practice challenge")
+    conclusion: str = Field(..., description="Summary and self-evaluation questions")
     resources: List[str] = Field(..., description="List of learning resources and references")
 
 class Chapter(BaseModel):
