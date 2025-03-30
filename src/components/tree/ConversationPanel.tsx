@@ -122,7 +122,7 @@ export const ConversationPanel = ({
           className="shrink-0 h-7 px-2.5 bg-black text-white rounded-full text-[11px] font-medium"
           onClick={() => onComplete()}
         >
-          Chapitre terminé
+          Valider le chapitre
         </Button>
       </div>
 
@@ -150,39 +150,39 @@ export const ConversationPanel = ({
             className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-secondary/10 hover:bg-secondary/20 flex items-center justify-center"
             onClick={onBack}
           >
-        <svg id="back-button"width="3rem" height="2rem" viewBox="0 0 852 852" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 852 852" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g filter="url(#filter0_d_83_1109)">
               <circle cx="426" cy="426" r="386" fill="#C7D7F6"/>
             </g>
-            <path d="M411.343 74.2024C378.427 197.046 608.874 324.472 575.958 447.316C543.042 570.159 243.93 596.32 211.014 719.164" 
-              stroke="currentColor" 
-              strokeWidth="29.3164" 
-              strokeMiterlimit="10" 
-              strokeLinecap="round" 
+            <path d="M411.343 74.2024C378.427 197.046 608.874 324.472 575.958 447.316C543.042 570.159 243.93 596.32 211.014 719.164"
+              stroke="currentColor"
+              strokeWidth="29.3164"
+              strokeMiterlimit="10"
+              strokeLinecap="round"
               strokeDasharray="48.86 48.86"
             />
-            <circle 
-              cx="576.586" 
-              cy="440.131" 
-              r="81.4881" 
-              transform="rotate(15 576.586 440.131)" 
+            <circle
+              cx="576.586"
+              cy="440.131"
+              r="81.4881"
+              transform="rotate(15 576.586 440.131)"
               fill="currentColor"
             />
             <defs>
-              <filter 
-                id="filter0_d_83_1109" 
-                x="0.911907" 
-                y="0.911419" 
-                width="850.177" 
-                height="850.177" 
-                filterUnits="userSpaceOnUse" 
+              <filter
+                id="filter0_d_83_1109"
+                x="0.911907"
+                y="0.911419"
+                width="850.177"
+                height="850.177"
+                filterUnits="userSpaceOnUse"
                 colorInterpolationFilters="sRGB"
               >
                 <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-                <feColorMatrix 
-                  in="SourceAlpha" 
-                  type="matrix" 
-                  values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" 
+                <feColorMatrix
+                  in="SourceAlpha"
+                  type="matrix"
+                  values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
                   result="hardAlpha"
                 />
                 <feOffset/>
@@ -193,7 +193,7 @@ export const ConversationPanel = ({
                 <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_83_1109" result="shape"/>
               </filter>
             </defs>
-          </svg> 
+          </svg>
         </Button>
         </div>
         <div className="flex gap-2">
