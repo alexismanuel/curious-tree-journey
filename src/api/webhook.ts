@@ -143,11 +143,6 @@ async function generateOnboarding(subject: string): Promise<any> {
     }
 }
 
-<<<<<<< HEAD
-export { sendCreateCourse, chatWithAI, generatePlanningTree, generateOnboarding };
-||||||| 96d51c0
-export { sendCreateCourse, chatWithAI, generatePlanningTree, generateOnboarding };
-=======
 async function generateFeedback(plan:LearningPlan, user_message: string, conversation_history:string): Promise<any> {
     try {
         const response = await fetch('https://curious-tree-journey.onrender.com/api/feedback', {
@@ -172,5 +167,4 @@ async function generateFeedback(plan:LearningPlan, user_message: string, convers
     }
 }
 
-export { sendCreateCourse, chatWithAI, generatePlanningTree, generateOnboarding };
->>>>>>> refs/remotes/origin/main
+export { sendCreateCourse, chatWithAI, generatePlanningTree, generateOnboarding, generateFeedback };
