@@ -13,8 +13,11 @@ class LLMParsingError(APIError):
     pass
 
 class ChapterContent(BaseModel):
-    explanation: str = Field(..., description="Detailed explanation of the chapter content")
-    tips: str = Field(..., description="Practical tips and advice for learning")
+    introduction: str = Field(..., description="Chapter objectives and importance")
+    theory: str = Field(..., description="Clear explanation of essential concepts")
+    guided_practice: str = Field(..., description="Step-by-step guided activity or tutorial")
+    challenge: str = Field(..., description="Independent practice challenge")
+    conclusion: str = Field(..., description="Summary and self-evaluation questions")
     resources: List[str] = Field(..., description="List of learning resources and references")
 
 class Chapter(BaseModel):
@@ -64,53 +67,19 @@ class FeedbackResponse(BaseModel):
     response: str = Field(..., description="Assistant's response to the user")
     plan: Optional[LearningPlan] = Field(None, description="Modified learning plan, if any")
 
-class Message(BaseModel):
-    """A message in the conversation history"""
-    role: str = Field(..., description="Role of the message sender (USER or ASSISTANT)")
-    content: str = Field(..., description="Content of the message")
-
 class ChatRequest(BaseModel):
     """Request model for chat endpoint."""
-    plan: LearningPlan = Field(..., description="Complete learning plan without chapter content")
-    current_chapter: str = Field(..., description="ID of the current chapter")
-    conversation_history: List[Message] = Field(default_factory=list, description="Previous conversation messages")
+    context: str = Field(..., description="Complete context including learning plan, current chapter, and conversation history")
     message: str = Field(..., description="User's message to respond to")
 
     class Config:
         json_schema_extra = {
             "example": {
-                "plan": {
-                    "title": "Docker Basics",
-                    "description": "Learn Docker fundamentals",
-                    "chapters": [
-                        {
-                            "id": "c1",
-                            "title": "Introduction to Docker",
-                            "prerequisites": []
-                        },
-                        {
-                            "id": "c2",
-                            "title": "Docker Installation",
-                            "prerequisites": ["c1"]
-                        },
-                        {
-                            "id": "c3",
-                            "title": "Docker Images and Containers",
-                            "prerequisites": ["c2"]
-                        }
-                    ]
-                },
-                "current_chapter": "c2",
-                "conversation_history": [
-                    {"role": "ASSISTANT", "content": "Docker can be installed on various operating systems..."},
-                    {"role": "USER", "content": "Ok but I didn't get the third fact"},
-                    {"role": "ASSISTANT", "content": "The third fact was about..."}
-                ],
-                "message": "How do I check if Docker is installed correctly?"
+                "context": "Learning Plan: Introduction to Python, Current Chapter: Variables and Data Types. Previous conversation: USER: What are variables? ASSISTANT: Variables are containers for storing data...",
+                "message": "Can you give me an example?"
             }
         }
 
 class ChatResponse(BaseModel):
     """Response model for chat endpoint."""
     response: str = Field(..., description="Assistant's response to the user")
-    conversation_history: List[Message] = Field(..., description="Updated conversation history")

@@ -232,7 +232,8 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
           </div>
 		  </div>
 
-          <div className="flex justify-end mr-4 pt-8">
+      </div>
+          <div className="flex justify-end absolute bottom-[14%] right-5 mr-4 pt-8">
             <Button
               onClick={handleStart}
               className="bg-black text-white hover:bg-black/90 px-6"
@@ -248,11 +249,8 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
               )}
             </Button>
           </div>
-       <div className="max-w-xl mx-auto">
-        </div>
-      </div>
 
-      <form onSubmit={handleSubmit} className="flex-shrink-0 sticky bottom-0 left-0 right-0 p-4 bg-white border-t">
+      <form onSubmit={handleSubmit} className="flex-shrink-0 sticky bottom-0 left-0 right-0 p-2 bg-white">
         <div className="max-w-xl mx-auto">
           <div className="flex gap-2">
             <Input
