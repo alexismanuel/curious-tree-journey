@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useScrollToBottom } from "@/hooks/useScrollToBottom";
 import { Input } from "@/components/ui/input";
@@ -17,9 +17,8 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
   const { toast } = useToast();
   const scrollToBottom = useScrollToBottom();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!goal.trim()) {
       toast({
         title: "Entrer votre objectif d'apprentissage",
@@ -28,22 +27,23 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
       });
       return;
     }
+    handleSubmit(goal);
+  };
 
+  const handleSubmit = async (text: string) => {
+    if (!text.trim()) return;
     setIsCreating(true);
 
     try {
-      onCreatePath(goal);
-
+      onCreatePath(text);
     } catch (error) {
       console.error("Erreur lors de la création du cours :", error);
-      // Gère l'erreur côté UI si besoin
       toast({
         title: "Erreur",
         description: "Une erreur s'est produite lors de la création du cours.",
         variant: "destructive"
       });
       setIsCreating(false);
-      return;
     }
   };
 
@@ -60,39 +60,74 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
 
       </div>
 
-	<form onSubmit={handleSubmit} className="z-10 w-full">
+	<div className="z-10 w-full">
 	  <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-4 bg-transparent">
-		<div className="relative w-full max-w-lg ">
-		  <Input
-			value={goal}
-			onChange={(e) => setGoal(e.target.value)}
-			onFocus={scrollToBottom}
-			placeholder="Je veux apprendre le marketing digital"
-			className="h-14 px-6 text-lg rounded-full border-2 border-[#E5E7EB] focus-visible:ring-0 focus-visible:border-[#372EC1] bg-white shadow-sm"
-		  />
-		  <Button
-			type="submit"
-			size="icon"
-			variant="default"
-			disabled={isCreating}
-			className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-[#372EC1] hover:bg-[#372EC1]/90"
-		  >
-			{isCreating ? (
-			  <motion.div
-				animate={{ rotate: 360 }}
-				transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+		{/* Example buttons */}
+		<div className="flex flex-col gap-2 mb-3 max-w-lg mx-auto w-full">
+		  {[
+			"Je veux apprendre à créer mon entreprise",
+			"Je veux apprendre le développement web"
+		  ].map((text, index) => (
+			<motion.div
+			  key={index}
+			  initial={{ backgroundColor: "rgba(255,255,255,0)" }}
+			  whileTap={{
+				scale: 0.95,
+				backgroundColor: "rgba(255,255,255,0.2)"
+			  }}
+			  whileHover={{ scale: 1.02 }}
+			  transition={{
+				type: "spring",
+				stiffness: 400,
+				damping: 17
+			  }}
+			>
+			  <Button
+				type="button"
+				variant="outline"
+				className="w-full text-sm bg-white/80 backdrop-blur-sm border-[#E5E7EB] hover:bg-white/90 justify-start px-4 py-2 text-left break-words whitespace-normal h-auto"
+				onClick={() => {
+				  setGoal(text);
+				  handleSubmit(text);
+				}}
 			  >
-				<Sparkles className="h-5 w-5" />
-			  </motion.div>
-			) : (
-			  <ArrowRight className="h-5 w-5" />
-			)}
-		  </Button>
+				{text}
+			  </Button>
+			</motion.div>
+		  ))}
 		</div>
+
+    <form onSubmit={handleCustomSubmit} className="relative w-full max-w-lg mx-auto">
+      <Input
+        value={goal}
+        onChange={(e) => setGoal(e.target.value)}
+        onFocus={scrollToBottom}
+        placeholder="Je veux apprendre le marketing"
+        className="h-14 px-6 text-lg rounded-full border-2 border-[#E5E7EB] focus-visible:ring-0 focus-visible:border-[#372EC1] bg-white shadow-sm"
+      />
+      <Button
+        type="submit"
+        size="icon"
+        variant="default"
+        disabled={isCreating}
+        className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-[#372EC1] hover:bg-[#372EC1]/90"
+      >
+        {isCreating ? (
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <Sparkles className="h-5 w-5" />
+          </motion.div>
+        ) : (
+          <ArrowRight className="h-5 w-5" />
+        )}
+      </Button>
+    </form>
 	  </div>
-	</form>
+	</div>
 	<div>
-<svg className="fixed -bottom-20 w-full -z-1" width="393" height="517" viewBox="0 0 393 517" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg className="fixed -bottom-[2%] w-full -z-1" width="393" height="517" viewBox="0 0 393 517" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M300.5 103.757C348.1 116.957 405.33 166.927 428 190.257L433.5 575.257L-41 569.757L-23 165.257C17.8 123.657 97.33 98.9268 132 91.7568C132 91.7568 210.56 77.3468 300.5 103.757Z" fill="#8DDB9B"/>
 <path d="M173.79 282.607C180.87 286.547 188.89 288.547 196.98 288.487C205.07 288.467 213.11 286.437 220.24 282.587C224.57 280.227 228.55 286.127 224.77 289.257C216.97 295.487 206.9 298.437 197.01 298.477C187.12 298.477 176.98 295.527 169.22 289.237C165.44 286.047 169.5 280.207 173.79 282.597V282.607Z" fill="#030023"/>
 <path d="M247.72 187.017C246.96 186.957 227.01 189.577 222.4 203.517C216.77 220.557 217.41 271.217 246.35 273.637C275.29 276.057 277.9 250.157 278.4 239.257C278.91 228.357 278.62 189.607 247.72 187.007V187.017Z" fill="white"/>
