@@ -36,33 +36,58 @@ def repair_json(text: str) -> str:
     # Fix missing quotes around property names
     text = re.sub(r'([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:', r'\1"\2":', text)
     
-    # Fix single quotes to double quotes
-    text = re.sub(r"'([^']*)':", r'"\1":', text)  # Fix property names
-    text = re.sub(r":\s*'([^']*)'([,}])", r':"\1"\2', text)  # Fix string values
+    # Fix single quotes to double quotes (handle nested quotes properly)
+    text = re.sub(r"'([^']*)'([,}\]]|:\s|$)", r'"\1"\2', text)
     
     # Fix trailing commas in objects/arrays
     text = re.sub(r',\s*([}\]])', r'\1', text)
     
     # Fix missing quotes around string values
-    text = re.sub(r':\s*([a-zA-Z][^,}\]]*[,}\]])', lambda m: f':"{m.group(1).strip().rstrip(",}]")}]"', text)
+    text = re.sub(r':\s*([a-zA-Z][^,}\]"]*?)([,}\]]|$)', r':"\1"\2', text)
+    
+    # Fix boolean and null values
+    text = re.sub(r':\s*"?(true|false|null)"?([,}\]]|$)', r':\1\2', text)
+    
+    # Add missing commas between properties
+    text = re.sub(r'("[^"]+":\s*(?:"[^"]*"|\[[^\]]*\]|\{[^}]*\}|true|false|null))\s*("[^"]+":)', r'\1,\2', text)
+    
+    # Remove any remaining single quotes
+    text = text.replace("'", '"')
+    
+    # Fix escaped newlines and special characters
+    text = text.replace('\\n', '\n').replace('\\r', '\r').replace('\\t', '\t')
     
     return text
 
 def parse_llm_output(output: str) -> str:
     """Parse LLM output, handling potential markdown code blocks."""
     content = output.strip()
-    if "```" in content:
-        # Find the last JSON block (in case there are multiple)
-        json_blocks = content.split("```")
-        for block in reversed(json_blocks):
-            if block.strip().startswith("json"):
-                content = block.replace("json", "", 1).strip()
-                break
-            elif not block.strip():
-                continue
-            else:
-                content = block.strip()
-                break
+    
+    # First try to find content between ```json and ``` markers
+    json_pattern = r'```json\s*([\s\S]*?)```'
+    matches = re.finditer(json_pattern, content)
+    for match in matches:
+        extracted = match.group(1).strip()
+        if extracted:
+            return extracted
+    
+    # If no ```json block found, try any ``` block
+    code_pattern = r'```\s*([\s\S]*?)```'
+    matches = re.finditer(code_pattern, content)
+    for match in matches:
+        extracted = match.group(1).strip()
+        if extracted.startswith('json'):
+            return extracted.replace('json', '', 1).strip()
+        if extracted and '{' in extracted and '}' in extracted:
+            return extracted.strip()
+    
+    # If no code blocks found, try to find content between { and }
+    if '{' in content and '}' in content:
+        json_content = re.search(r'\{[\s\S]*\}', content)
+        if json_content:
+            return json_content.group(0)
+    
+    # If all else fails, return the original content
     return content
 
 def try_parse_json(content: str) -> Dict[str, Any]:
