@@ -103,7 +103,7 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
         onChange={(e) => setGoal(e.target.value)}
         onFocus={scrollToBottom}
         placeholder="Je veux apprendre le marketing"
-        className="h-14 px-6 text-lg rounded-full border-2 border-[#E5E7EB] focus-visible:ring-0 focus-visible:border-[#372EC1] bg-white shadow-sm"
+        className="h-auto min-h-[3.5rem] px-6 text-lg rounded-full border-2 border-[#E5E7EB] focus-visible:ring-0 focus-visible:border-[#372EC1] bg-white shadow-sm whitespace-normal break-words"
       />
       <Button
         type="submit"
