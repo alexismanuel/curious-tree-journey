@@ -98,13 +98,13 @@ export const ConversationPanel = ({
 
 
   return (
-    <div className="flex flex-col h-full max-w-2xl mx-auto px-6 pb-1.5 pt-6 relative">
+    <div className="flex flex-col h-full max-w-2xl mx-auto px-3 sm:px-6 pb-1.5 pt-4 sm:pt-6 relative">
       {/* Header */}
-      <div className="mb-6 relative">
-        <h1 className="text-xl font-semibold text-center mb-1">{node.title}</h1>
+      <div className="mb-4 sm:mb-6 flex flex-row items-center justify-between gap-2">
+        <h2 className="text-base sm:text-lg font-medium flex-1 pr-2">{node.title}</h2>
         <Button
           variant="secondary"
-          className="absolute right-0 -top-1 px-5 py-2.5 bg-black text-white rounded-full text-sm font-medium"
+          className="shrink-0 h-7 px-2.5 bg-black text-white rounded-full text-[11px] font-medium"
           onClick={() => onComplete()}
         >
           Chapitre terminé
@@ -127,15 +127,15 @@ export const ConversationPanel = ({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="mt-4 space-y-4">
+      <div className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
         <div className="flex justify-end">
           <Button
             variant="secondary"
             size="icon"
-            className="h-320 w-320 rounded-full bg-secondary/10 hover:bg-secondary/20 flex items-center justify-center"
+            className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-secondary/10 hover:bg-secondary/20 flex items-center justify-center"
             onClick={onBack}
           >
-        <svg width="852" height="852" viewBox="0 0 852 852" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg id="back-button"width="3rem" height="2rem" viewBox="0 0 852 852" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g filter="url(#filter0_d_83_1109)">
               <circle cx="426" cy="426" r="386" fill="#C7D7F6"/>
             </g>
@@ -186,7 +186,7 @@ export const ConversationPanel = ({
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Type your message..."
-            className="resize-none"
+            className="resize-none text-sm sm:text-base min-h-[2.5rem] sm:min-h-[3rem] py-2"
             onKeyDown={e => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
