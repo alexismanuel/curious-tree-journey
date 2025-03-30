@@ -138,7 +138,7 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div ref={containerRef} className="flex-1 overflow-y-auto px-4 py-6 scroll-smooth min-h-0">
+      <div ref={containerRef} className="flex-1 overflow-y-auto scroll-smooth min-h-0">
         <div className="max-w-xl mx-auto">
           <div className="space-y-4">
             <AnimatePresence mode="popLayout">

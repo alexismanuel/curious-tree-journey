@@ -42,20 +42,41 @@ export const PathView = ({
   const handleCompleteNode = () => {
     if (!activeNode) return;
 
+    // First, mark the current node as completed
     const updatedNodes = treeData.nodes.map(node => {
       if (node.id === activeNode.id) {
         return { ...node, status: "completed" as const };
       }
-      if (activeNode.children.some(child => child.id === node.id)) {
-        return { ...node, status: node.status === "locked" ? "upcoming" as const : node.status };
-      }
       return node;
+    });
+
+    // Create a set of completed node IDs
+    const completedNodes = new Set(
+      updatedNodes
+        .filter(node => node.status === "completed")
+        .map(node => node.id)
+    );
+
+    // Update the status of all nodes based on prerequisites
+    const finalNodes = updatedNodes.map(node => {
+      if (node.status === "completed") return node;
+
+      // Check if all prerequisites are completed
+      const allPrerequisitesCompleted = !node.prerequisites || 
+        node.prerequisites.length === 0 ||
+        node.prerequisites.every(prereqId => completedNodes.has(prereqId));
+
+      if (allPrerequisitesCompleted) {
+        return { ...node, status: "active" as const };
+      } else {
+        return { ...node, status: "locked" as const };
+      }
     });
 
     setTreeData({
       ...treeData,
-      nodes: updatedNodes,
-      rootNode: updatedNodes.find(node => node.id === treeData.rootNode.id) || treeData.rootNode
+      nodes: finalNodes,
+      rootNode: finalNodes.find(node => node.id === treeData.rootNode.id) || treeData.rootNode
     });
 
     toast({

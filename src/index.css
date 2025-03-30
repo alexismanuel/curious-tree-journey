@@ -16,6 +16,8 @@ html, body {
   height: 100vh;
   margin: 0;
   padding: 0;
+  top: 0;
+  position: absolute;
 }
 
 /* Tree visualization styles */
@@ -55,6 +57,9 @@ html, body {
   .node span {
     font-size: 0.875rem;
   }
+}
+.la-primary {
+	color: #372EC1
 }
 
 .node-completed {
@@ -113,7 +118,6 @@ html, body {
 
 /* Fix container heights */
 html, body {
-  height: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;

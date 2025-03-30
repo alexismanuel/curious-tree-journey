@@ -64,27 +64,32 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background overflow-hidden">
-      {/* Minimal background */}
-      <div className="inset-0 overflow-hidden">
-        <div
-          className="-translate-x-1/2 w-full h-full bg-muted rounded-full blur-3xl opacity-10 -z-10"
-        />
-      </div>
-
-      {/* Progress dots */}
-      {(stage === "creation" || stage === "personalization") && (
-        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-20">
-          <ProgressDots
-            totalSteps={2}
-            currentStep={stage === "creation" ? 1 : 2}
-          />
+    <div className="min-h-screen flex flex-col bg-white overflow-hidden">
+      {/* Macott character background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-x-0 bottom-0 w-full h-[90vh]">
+          <div className="relative w-full h-full">
+            {/* Background color with wave shape */}
+            <div
+              className="absolute inset-x-0 bottom-0 w-full h-full bg-[#A6E3B8]"
+              style={{
+                clipPath: 'path("M 0 40 Q 50 0, 100 40 L 100 100 L 0 100 Z")',
+              }}
+            />
+            {/* Macott face */}
+            <div
+              className="absolute left-1/2 bottom-[35%] -translate-x-1/2 w-[300px] aspect-[1/1.2]"
+              style={{
+                background: `url('/macott.svg') no-repeat center/contain`,
+              }}
+            />
+          </div>
         </div>
-      )}
+      </div>
 
       {/* Content */}
       <motion.div
-        className="flex-1 flex items-start sm:items-center justify-center px-4 relative z-10 pt-4 sm:pt-0"
+        className="flex-1 flex items-start sm:items-center justify-center relative z-10 pt-4 sm:pt-0"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}

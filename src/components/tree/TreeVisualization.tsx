@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ReactFlow, Background, Controls, useNodesState, useEdgesState, MarkerType } from "@xyflow/react";
+import { ReactFlow, Background, Controls, useNodesState, useEdgesState, MarkerType, useReactFlow, Panel } from "@xyflow/react";
 import '@xyflow/react/dist/style.css';
 import { Node, TreeData } from "@/types/tree";
 import { CustomNode } from "./CustomNode";
@@ -13,6 +13,23 @@ const edgeTypes = {
   custom: CustomEdge
 } as const;
 
+// Component to handle centering on first node
+const CenterOnLoad = ({ nodes }: { nodes: any[] }) => {
+  const { setCenter } = useReactFlow();
+
+  useEffect(() => {
+    if (nodes.length > 0) {
+      const firstNode = nodes[0];
+      // Wait a bit for the layout to settle
+      setTimeout(() => {
+        setCenter(firstNode.position.x, firstNode.position.y, { zoom: 1.2, duration: 1000 });
+      }, 100);
+    }
+  }, [nodes, setCenter]);
+
+  return null;
+};
+
 export const TreeVisualization = ({
   treeData: initialTreeData,
   selectedNode,
@@ -22,6 +39,46 @@ export const TreeVisualization = ({
   selectedNode: Node | null;
   onNodeSelect: (node: Node) => void;
 }) => {
+  // Function to check if a node should be unlocked
+  const shouldUnlockNode = (node: Node, completedNodes: Set<string>) => {
+    // If no prerequisites, node should be active
+    if (!node.prerequisites || node.prerequisites.length === 0) return true;
+    // Check if all prerequisites are completed
+    return node.prerequisites.every(prereqId => completedNodes.has(prereqId));
+  };
+
+  // Function to update node statuses
+  const updateNodeStatuses = (treeData: TreeData) => {
+    const completedNodes = new Set<string>();
+    
+    // First pass: collect completed nodes
+    const findCompletedNodes = (node: Node) => {
+      if (node.status === 'completed') {
+        completedNodes.add(node.id);
+      }
+      node.children.forEach(findCompletedNodes);
+    };
+    findCompletedNodes(treeData.rootNode);
+
+    // Second pass: update statuses
+    const updateStatuses = (node: Node) => {
+      // Skip completed nodes
+      if (node.status === 'completed') return;
+      
+      // Check if node should be unlocked
+      if (shouldUnlockNode(node, completedNodes)) {
+        node.status = 'active';
+      } else {
+        node.status = 'locked';
+      }
+      
+      // Update children
+      node.children.forEach(updateStatuses);
+    };
+    updateStatuses(treeData.rootNode);
+
+    return treeData;
+  };
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [treeData, setTreeData] = useState<TreeData>(initialTreeData);
@@ -48,8 +105,8 @@ export const TreeVisualization = ({
         width: diameter,
         height: diameter,
         scale: 1,
-        primaryColor: '#F0F0F0',
-        borderColor: '#000000',
+        primaryColor: '#372EC1',
+        borderColor: '#372EC1',
         borderWidth: 2,
         borderRadius: '50%',
       };
@@ -80,7 +137,7 @@ export const TreeVisualization = ({
     // Add edge between parent and current node
     if (parentId) {
       const edgeStyle: React.CSSProperties = {
-        stroke: '#000000',
+        stroke: '#372EC1',
         strokeWidth: 2,
         strokeDasharray: '5,5',
         opacity: 0.6
@@ -98,7 +155,7 @@ export const TreeVisualization = ({
           type: MarkerType.ArrowClosed,
           width: 20,
           height: 20,
-          color: '#000000',
+          color: '#372EC1',
         },
       });
     }
@@ -131,7 +188,8 @@ export const TreeVisualization = ({
 
   // Update tree data when initialTreeData changes
   useEffect(() => {
-    setTreeData(initialTreeData);
+    const updatedTreeData = updateNodeStatuses({...initialTreeData});
+    setTreeData(updatedTreeData);
   }, [initialTreeData]);
 
   console.log(edges)
@@ -146,7 +204,7 @@ export const TreeVisualization = ({
       edgeTypes={edgeTypes}
       fitView
       minZoom={0.5}
-      maxZoom={1.5}
+      maxZoom={2}
       nodesDraggable={false}
       nodesConnectable={false}
       elementsSelectable={true}
@@ -157,6 +215,7 @@ export const TreeVisualization = ({
     >
       <Background />
       <Controls />
+      <CenterOnLoad nodes={nodes} />
     </ReactFlow>
   );
 };

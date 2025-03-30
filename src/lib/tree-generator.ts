@@ -41,12 +41,12 @@ export const generateTreeFromCourseData = (courseData: NewCourseFormat): TreeDat
     status: "active",
     children: []
   };
-  
+
   // Create node map for easy access
   const nodeMap: Record<string, Node> = {
     [rootNode.id]: rootNode
   };
-  
+
   // Create nodes for each chapter
   courseData.chapters.forEach((chapter) => {
     const chapterNode: Node = {
@@ -58,15 +58,15 @@ export const generateTreeFromCourseData = (courseData: NewCourseFormat): TreeDat
       content: chapter.content,
       prerequisites: chapter.prerequisites || []
     };
-    
+
     nodeMap[chapter.id] = chapterNode;
   });
-  
+
   // Build parent-child relationships
   courseData.chapters.forEach((chapter) => {
     const chapterNode = nodeMap[chapter.id];
     const prerequisites = chapter.prerequisites || [];
-    
+
     if (prerequisites.length === 0) {
       // No prerequisites, attach to root
       rootNode.children.push(chapterNode);
@@ -80,7 +80,7 @@ export const generateTreeFromCourseData = (courseData: NewCourseFormat): TreeDat
         .slice()
         .reverse()
         .find(prereqId => nodeMap[prereqId]);
-      
+
       if (lastPrereq && nodeMap[lastPrereq]) {
         nodeMap[lastPrereq].children.push(chapterNode);
       } else {
@@ -90,7 +90,7 @@ export const generateTreeFromCourseData = (courseData: NewCourseFormat): TreeDat
       }
     }
   });
-  
+
   return {
     rootNode,
     nodes: Object.values(nodeMap)

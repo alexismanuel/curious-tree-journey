@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="360" viewBox="0 0 300 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main body shape -->
+  <path d="M 20 100 
+           C 20 50, 280 50, 280 100
+           L 280 320
+           C 280 340, 20 340, 20 320
+           Z" 
+        fill="#A6E3B8"/>
+  
+  <!-- Top bump -->
+  <path d="M 100 50
+           C 100 20, 200 20, 200 50
+           C 200 70, 100 70, 100 50
+           Z"
+        fill="#A6E3B8"/>
+
+  <!-- Eyes with white outline -->
+  <ellipse cx="100" cy="180" rx="30" ry="40" fill="white"/>
+  <ellipse cx="100" cy="180" rx="24" ry="34" fill="#0A0A29"/>
+  <ellipse cx="200" cy="180" rx="30" ry="40" fill="white"/>
+  <ellipse cx="200" cy="180" rx="24" ry="34" fill="#0A0A29"/>
+
+  <!-- Smile -->
+  <path d="M 120 240
+           C 150 260, 170 260, 180 240"
+        stroke="#0A0A29"
+        stroke-width="8"
+        stroke-linecap="round"
+        fill="none"/>
+</svg>

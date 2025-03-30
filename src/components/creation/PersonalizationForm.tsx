@@ -28,9 +28,9 @@ export const PersonalizationForm = ({ goal, onboardMsg, onSubmit }: Personalizat
       transition={{ duration: 0.4 }}
     >
       <div className="flex flex-col items-center gap-24 text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Personnalise ton apprentissage</h1>
+        <h1 className="la-primary text-3xl font-bold tracking-tight">Personnalise ton apprentissage</h1>
         <div className="space-y-3">
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg mx-4 text-muted-foreground">
             {onboardMsg}
           </p>
         </div>
