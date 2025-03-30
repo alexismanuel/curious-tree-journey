@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Message, Node } from "@/types/tree";
 import { generateInitialMessages } from "@/lib/conversation-generator";
 import { chatWithAI } from "@/api/webhook";
+import { getFromLocalStorage } from "@/utils/localStorage";
+import { chapters, DataChapter } from "@/types/tree";
 
 const ChatMessage = forwardRef<HTMLDivElement, { message: Message }>((props, ref) => {
   const { message } = props;
@@ -74,8 +76,12 @@ export const ConversationPanel = ({
   }, [messages]);
 
   const handleSubmit = async () => {
+    const DataChapter = getFromLocalStorage("courseData", null);
+    const chapterContent = DataChapter.chapters.find((chap: chapters) => chap.id === node.id)?.content ?? "null";
+
     const conversationHistoryString = [
-      "System: Tu es un assistant sympas",
+      "System: Tu es un professeur qui doit expliquer et aider l'utilisateur à l'apprendre, voici le contenu du chapitre :",
+      `\n${chapterContent}\n`,
       ...localMessages.map(message =>
         `${message.sender === "user" ? "User" : "Assistant"}: ${message.content}`
       )

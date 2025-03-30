@@ -34,6 +34,7 @@ const TreeGraph = () => {
   };
 
   return (
+	  <div className="my-auto mx-4">
     <svg width="300" height="120" viewBox="0 0 300 120">
       {/* Rendu des connexions */}
       {connections.map((conn, index) => {
@@ -70,6 +71,7 @@ const TreeGraph = () => {
         />
       ))}
     </svg>
+	</div>
   );
 };
 
@@ -82,14 +84,14 @@ const TreeGraph = () => {
  * @param {boolean} [props.pulseEffect=true] - Activer l'effet de pulsation sur le point
  * @returns {JSX.Element} Composant de barre de chargement et arborescence animée
  */
-const LoadingBar = ({ 
-  height = 6, 
-  width = 300, 
+const LoadingBar = ({
+  height = 6,
+  width = 300,
   message = "Création de votre parcours...",
   pulseEffect = true
 }) => {
   const [progress, setProgress] = useState(0);
-  
+
   useEffect(() => {
     // Simulation d'une progression aléatoire pour simuler l'activité
     const interval = setInterval(() => {
@@ -99,15 +101,15 @@ const LoadingBar = ({
         return newValue;
       });
     }, 300);
-    
+
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-white shadow-lg">
+    <div className="flex flex-col items-center justify-center p-6 ">
       <div className="mb-4 text-lg font-medium text-black">{message}</div>
-      
-      <div 
+
+      <div
         className="relative overflow-hidden rounded-full"
         style={{ width: `${width}px`, height: `${height}px`, backgroundColor: "#f0f0f0" }}
       >
@@ -119,15 +121,15 @@ const LoadingBar = ({
           transition={{ ease: "easeInOut", duration: 0.5 }}
         />
       </div>
-      
+
       {pulseEffect && (
         <motion.div
           className="mt-6"
           animate={{ scale: [1, 1.05, 1] }}
-          transition={{ 
-            repeat: Infinity, 
+          transition={{
+            repeat: Infinity,
             duration: 1.5,
-            ease: "easeInOut" 
+            ease: "easeInOut"
           }}
         >
           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "black" }} />
