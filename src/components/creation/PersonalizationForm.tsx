@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight } from "lucide-react";
+import { useScrollToBottom } from "@/hooks/useScrollToBottom";
 
 interface PersonalizationFormProps {
   goal: string;
@@ -12,6 +13,7 @@ interface PersonalizationFormProps {
 
 export const PersonalizationForm = ({ goal, onboardMsg, onSubmit }: PersonalizationFormProps) => {
   const [details, setDetails] = useState("");
+  const scrollToBottom = useScrollToBottom();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +42,7 @@ export const PersonalizationForm = ({ goal, onboardMsg, onSubmit }: Personalizat
             <Input
               value={details}
               onChange={(e) => setDetails(e.target.value)}
+              onFocus={scrollToBottom}
               placeholder="Mes objectifs..."
               className="h-14 px-4 pr-12 text-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />

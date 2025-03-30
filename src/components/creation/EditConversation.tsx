@@ -8,6 +8,7 @@ import { Message, Node, TreeData, CoursePlan } from "@/types/tree";
 import { generateInitialMessages } from "@/lib/conversation-generator";
 import { chatWithAI } from "@/api/webhook";
 import { getFromLocalStorage } from "@/utils/localStorage";
+import { useScrollToBottom } from "@/hooks/useScrollToBottom";
 
 const ChatMessage = forwardRef<HTMLDivElement, { message: Message; coursePlan?: CoursePlan | null }>((props, ref) => {
   const { message, coursePlan } = props;
@@ -67,6 +68,7 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = useScrollToBottom();
 
   useEffect(() => {
     const plan = getFromLocalStorage("coursePlan", null);
@@ -186,6 +188,7 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
                   handleSubmit(e);
                 }
               }}
+              onFocus={scrollToBottom}
             />
             <Button
               type="submit"

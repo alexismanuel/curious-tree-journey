@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useScrollToBottom } from "@/hooks/useScrollToBottom";
 import { Input } from "@/components/ui/input";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +15,7 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
   const [goal, setGoal] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const { toast } = useToast();
+  const scrollToBottom = useScrollToBottom();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +65,7 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
 		  <Input
 			value={goal}
 			onChange={(e) => setGoal(e.target.value)}
+			onFocus={scrollToBottom}
 			placeholder="Je veux apprendre..."
 			className="h-14 px-4 text-lg pr-12 border-2 focus-visible:ring-0 focus-visible:border-gray-400"
 		  />
