@@ -231,7 +231,7 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="flex justify-center pt-8">
+          <div className="flex justify-end mr-4 pt-8">
             <Button
               onClick={handleStart}
               className="bg-black text-white hover:bg-black/90 px-6"
@@ -246,6 +246,21 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
                 "C'est parti !"
               )}
             </Button>
+          </div>
+       <div className="max-w-xl mx-auto">
+          <div className="space-y-4">
+            <AnimatePresence mode="popLayout">
+              {messages.map(message => (
+                <ChatMessage key={message.id} message={message} coursePlan={coursePlan} />
+              ))}
+            </AnimatePresence>
+            {isLoading && (
+              <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <span>En réflexion...</span>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
         </div>
       </div>
