@@ -38,7 +38,7 @@ export interface Message {
   isInitial?: boolean;
 }
 
-export interface Chapitre {
+export interface chapters {
   id: string;
   title: string;
   prerequisites: string[];
@@ -49,5 +49,5 @@ export interface DataChapter {
   title: string;
   description: string;
   id: string;
-  chapters: Chapitre[];
+  chapters: chapters[];
 }

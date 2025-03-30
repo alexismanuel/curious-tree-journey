@@ -143,7 +143,7 @@ export const ConversationPanel = ({
         {isLoading && (
           <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground">
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            <span>En réfléxion...</span>
+            <span>En réflexion...</span>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -207,7 +207,7 @@ export const ConversationPanel = ({
           <Textarea
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder="Type your message..."
+            placeholder="Ecrivez votre message..."
             className="resize-none text-sm sm:text-base min-h-[2.5rem] sm:min-h-[3rem] py-2"
             onKeyDown={e => {
               if (e.key === "Enter" && !e.shiftKey) {
