@@ -29,6 +29,7 @@ export interface Message {
   sender: "ai" | "user";
   content: string;
   timestamp: string;
+  isInitial?: boolean;
 }
 
 export interface Chapitre {
