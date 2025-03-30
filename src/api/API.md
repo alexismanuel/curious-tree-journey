@@ -35,11 +35,11 @@ Content-Type: application/json
 Response: string (the context question)
 ```
 
-### 2. Generate Learning Plan
-Generates a structured learning plan based on subject and context.
+### 2. Generate Complete Learning Path
+Generates a complete learning path with detailed chapter contents in one call.
 
 ```http
-POST /api/plan
+POST /api/generate_content
 Content-Type: application/json
 
 {
@@ -47,36 +47,34 @@ Content-Type: application/json
     "context": "string"   // Your learning context
 }
 
-Response: LearningPlan object
+Response: Complete LearningPlan object with detailed chapter contents
 ```
 
-### 3. Generate Chapter Contents
-Generates detailed content for each chapter in a learning plan.
+This endpoint combines plan generation and chapter content generation into a single call. It will:
+1. Generate the learning plan structure based on the subject and context
+2. Generate detailed content for each chapter in the plan
+3. Return the complete learning plan with all chapter contents
+
+### 3. Process Feedback
+Enables conversational interaction with the learning plan. Users can ask questions, request modifications, or get clarification about any aspect of the plan.
 
 ```http
-POST /api/chapters
+POST /api/feedback
 Content-Type: application/json
 
 {
-    // LearningPlan object
+    "context": "string",              // Original learning context
+    "current_plan": LearningPlan,     // Current learning plan
+    "user_message": "string",        // User's feedback or question
+    "conversation_history": [         // Optional list of previous messages
+        "string"
+    ]
 }
 
-Response: LearningPlan object with chapter contents
-```
-
-### 4. Generate Complete Learning Path
-Complete pipeline that generates everything in one call.
-
-```http
-POST /api/generate
-Content-Type: application/json
-
-{
-    "subject": "string",  // What you want to learn
-    "context": "string"   // Your learning context
+Response: {
+    "response": "string",            // Assistant's response
+    "plan": LearningPlan | null      // Modified plan or null if no changes
 }
-
-Response: Complete LearningPlan object with chapters
 ```
 
 ## Response Models
@@ -84,10 +82,8 @@ Response: Complete LearningPlan object with chapters
 ### LearningPlan
 ```json
 {
-    "id": "string",
     "title": "string",
     "description": "string",
-    "context": "string",
     "chapters": [
         {
             "id": "string",
