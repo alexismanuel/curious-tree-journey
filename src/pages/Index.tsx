@@ -29,12 +29,8 @@ const Index = () => {
     setLoadingMessage("Génération de votre parcours d'apprentissage personnalisé...");
 
     try {
-      // Fusionne le but d'apprentissage et les détails de personnalisation
-      const personalizedGoal = `${learningGoal} ${details}`;
-      console.log("Personalized Goal:", personalizedGoal);
-      
       // Attendre la réponse de l'API
-      const response = await generatePlanningTree(personalizedGoal);
+      const response = await generatePlanningTree(learningGoal, details);
       saveToLocalStorage("coursePlan", response);
       setLearningGoal(response.title)
       const courseData = await sendCreateCourse(response);

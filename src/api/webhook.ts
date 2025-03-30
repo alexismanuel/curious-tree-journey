@@ -1,11 +1,11 @@
-async function generatePlanningTree(tree: string): Promise<any> {
+async function generatePlanningTree(subject: string, context: string): Promise<any> {
     try {
-        const response = await fetch('https://hook.eu1.make.com/ihmym1n82oq1hqb7sa83fa5n5mwa8v48', {
+        const response = await fetch('https://curious-tree-journey.onrender.com/api/plan', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ tree })
+            body: JSON.stringify({ context, subject })
         });
 
         // Vérification du statut de la réponse
