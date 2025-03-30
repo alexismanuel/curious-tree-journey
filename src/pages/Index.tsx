@@ -6,8 +6,8 @@ import { PathView } from "@/components";
 import { generateTreeFromCourseData } from "@/lib/tree-generator";
 import { TreeData } from "@/types/tree";
 import { ProgressDots } from "@/components/ui/progress-dots";
-import { generatePlanningTree, sendCreateCourse, generateOnboarding } from "@/api/webhook";
-import { saveToLocalStorage } from "@/utils/localStorage";
+import { generatePlanningTree, generateOnboarding } from "@/api/webhook";
+import { saveToLocalStorage, getFromLocalStorage } from "@/utils/localStorage";
 import LoadingBar from "@/components/ui/LoadingBar";
 import { EditConversation } from "@/components/creation/EditConversation";
 
@@ -52,6 +52,14 @@ const Index = () => {
   };
 
   const handlePathEditionSubmit = async () => {
+    const localPlan = getFromLocalStorage("coursePlan", null);
+
+    if (localPlan) {
+      const initialTree = generateTreeFromCourseData(localPlan);
+      setTreeData(initialTree);
+      console.log("tree changed:", localPlan);
+    }
+
     setStage("tree");
   }
 
@@ -94,7 +102,7 @@ const Index = () => {
         {stage === "creation" && <LearningPathCreation onCreatePath={handleCreatePath} />}
         {stage === "personalization" && <PersonalizationForm goal={learningGoal} onboardMsg={onboardingData} onSubmit={handlePersonalization} />}
         {stage === "pathEdition" && treeData && <EditConversation treeData={treeData} onSubmit={handlePathChanges} onStart={handlePathEditionSubmit} />}
-        {stage === "loading" && <LoadingBar message={loadingMessage} color="indigo" width={350} />}
+        {stage === "loading" && <LoadingBar message={loadingMessage} width={350} />}
         {stage === "tree" && <PathView learningGoal={learningGoal} treeData={treeData} />}
       </motion.div>
     </div>

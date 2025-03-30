@@ -5,12 +5,12 @@ from fastapi.responses import JSONResponse
 from .models import (
     ContextRequest, PlanRequest, LearningPlan, ContentRequest,
     FeedbackRequest, FeedbackResponse, APIError, LLMParsingError,
-    ChatRequest, ChatResponse, Message
+    ChatRequest, ChatResponse, Message, ChapterContent
 )
 from .chat import chat_with_assistant
 from .llm import (
     context_chain, plan_chain, chapters_chain, feedback_chain,
-    parse_plan_output, parse_feedback_output
+    parse_plan_output, parse_feedback_output, parse_llm_output, try_parse_json
 )
 
 app = FastAPI(
@@ -157,7 +157,55 @@ async def generate_content(request: ContentRequest) -> LearningPlan:
         result = await chapters_chain.ainvoke({
             "learning_plan": json.dumps(request.plan.model_dump(), ensure_ascii=False)
         })
-        return parse_plan_output(result)
+        
+        # Extract and parse the JSON content
+        content = parse_llm_output(result.content)
+        try:
+            data = try_parse_json(content)
+            
+            # Validate the response structure
+            if not isinstance(data, dict) or 'chapters' not in data or not isinstance(data['chapters'], list):
+                raise ValueError("Invalid response structure: missing or invalid 'chapters' array")
+            
+            # Create a deep copy of the plan to avoid modifying the original
+            updated_plan = request.plan.model_copy(deep=True)
+            
+            # Create a map of chapter IDs to their indices for faster lookup
+            chapter_map = {chapter.id: i for i, chapter in enumerate(updated_plan.chapters)}
+            
+            # Process each chapter's content
+            for chapter_data in data['chapters']:
+                # Validate chapter data structure
+                if not isinstance(chapter_data, dict):
+                    continue
+                    
+                chapter_id = chapter_data.get('id')
+                chapter_content = chapter_data.get('content')
+                
+                if not chapter_id or not chapter_content:
+                    continue
+                    
+                # Find and update the chapter if it exists in our plan
+                if chapter_id in chapter_map:
+                    try:
+                        validated_content = ChapterContent.model_validate(chapter_content)
+                        updated_plan.chapters[chapter_map[chapter_id]].content = validated_content
+                    except Exception as e:
+                        print(f"Error validating content for chapter {chapter_id}: {str(e)}")
+                        raise ValueError(f"Invalid content structure for chapter {chapter_id}: {str(e)}")
+            
+            return updated_plan
+            
+        except ValueError as e:
+            raise LLMParsingError(
+                "Invalid or incomplete chapter contents",
+                {"error": str(e), "output": content}
+            )
+        except Exception as e:
+            raise LLMParsingError(
+                "Failed to parse chapter contents",
+                {"error": str(e), "output": content}
+            )
     except LLMParsingError as e:
         raise APIError(
             message="Failed to generate valid chapter contents",

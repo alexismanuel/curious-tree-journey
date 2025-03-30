@@ -66,6 +66,7 @@ async function sendCreateCourse(plan: LearningPlan): Promise<any> {
         }
 
         const data = await response.json();
+        console.log('Réponse de l API:', data);
         
         // Return the data with chapters for EditConversation
         return {
@@ -138,15 +139,17 @@ async function generateOnboarding(subject: string): Promise<any> {
     }
 }
 
-async function generateFeedback(plan:LearningPlan, user_message: string, conversation_history:string): Promise<any> {
+async function generateFeedback(context: string, current_plan:LearningPlan, user_message: string, conversation_history:string): Promise<any> {
     try {
         const response = await fetch('https://curious-tree-journey.onrender.com/api/feedback', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ plan, user_message, conversation_history })
+            body: JSON.stringify({ context ,current_plan, user_message, conversation_history })
         });
+
+        console.log("Réponse du webhook:", response);
 
         // Vérification du statut de la réponse
         if (!response.ok) {
@@ -154,7 +157,7 @@ async function generateFeedback(plan:LearningPlan, user_message: string, convers
         }
 
         const data = await response.json();
-        console.log('Réponse du webhook:', data);
+        console.log('Réponse de l API:', data);
         return data;
     } catch (error) {
         console.error('Erreur lors de l\'appel du webhook:', error);
