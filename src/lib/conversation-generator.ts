@@ -5,7 +5,7 @@ import { DataChapter, Chapitre } from "@/types/tree";
 // Generate initial conversation messages based on the node
 export const generateInitialMessages = (node: Node): Message[] => {
   const DataChapter = getFromLocalStorage("courseData", null);
-  const chapterContent = DataChapter.chapitres.find((chap: Chapitre) => chap.id === node.id)?.contenu;
+  const chapterContent = DataChapter.chapters.find((chap: Chapitre) => chap.id === node.id)?.contenu ?? "null";
   console.log("Chapter Content:", chapterContent);
   
   // If the node is already completed, return a summary conversation

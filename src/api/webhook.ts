@@ -1,3 +1,27 @@
+
+/**
+ * Interface définissant la structure d'un chapitre du cours
+ */
+interface Chapter {
+    id?: string;
+    title: string;
+    prerequisites?: string[];
+    content?: {
+        explanation?: string;
+        tips?: string;
+        resources?: string[];
+    };
+}
+
+/**
+ * Interface définissant la structure d'un plan d'apprentissage
+ */
+interface LearningPlan {
+    title: string;
+    description: string;
+    chapters: Chapter[];
+}
+
 async function generatePlanningTree(subject: string, context: string): Promise<any> {
     try {
         const response = await fetch('https://curious-tree-journey.onrender.com/api/plan', {
@@ -23,42 +47,28 @@ async function generatePlanningTree(subject: string, context: string): Promise<a
     }
 }
 /**
- * Envoie une requête POST vers le webhook de Make avec la variable `create_course`
- * et retourne la réponse du webhook.
- *
- * @param create_course - La donnée à transmettre au webhook.
- * @returns La réponse du webhook convertie en JSON.
+ * Envoie une requête pour générer du contenu détaillé pour un plan d'apprentissage
+ * @param learningPlan - Le plan d'apprentissage pour lequel générer du contenu
+ * @returns La réponse de l'API contenant le plan d'apprentissage avec le contenu généré
  */
-async function sendCreateCourse(create_course: any): Promise<any> {
+async function sendCreateCourse(plan: LearningPlan): Promise<any> {
     // Affichages de débogage détaillés
     console.log('Envoie de la requête');
-    console.log('Type de create_course:', typeof create_course);
+    console.log('Type de learningPlan:', typeof plan);
     
-    // Si c'est une chaîne, essayons de voir si c'est déjà du JSON
-    if (typeof create_course === 'string') {
-        console.log('create_course est une chaîne de caractères');
-        try {
-            // Vérifions si c'est du JSON valide
-            JSON.parse(create_course);
-            console.log('La chaîne est un JSON valide');
-        } catch (e) {
-            console.log('La chaîne n\'est PAS un JSON valide:', e.message);
-        }
-    }
-    
-    // Préparons le corps de la requête avec des logs
-    const requestBody = JSON.stringify({ course: create_course });
+    // Préparons le corps de la requête avec des logs - envoyons directement l'objet sans l'envelopper
+    const requestBody = JSON.stringify({plan: plan});
     console.log('Corps de la requête:', requestBody);
     
     try {
-        const response = await fetch('https://hook.eu1.make.com/p7esqd79lmis8i55kpesi2fq6e4nkizy', {
+        const response = await fetch('https://curious-tree-journey.onrender.com/api/generate_content', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: requestBody
         });
-
+        
         console.log('Statut de la réponse:', response.status);
         
         // On récupère d'abord le texte brut pour voir s'il y a un problème
@@ -78,7 +88,7 @@ async function sendCreateCourse(create_course: any): Promise<any> {
         
         return data;
     } catch (error) {
-        console.error('Erreur lors de l\'appel du webhook:', error);
+        console.error('Erreur lors de l\'appel de l\'API:', error);
         throw error;
     }
 }
@@ -117,6 +127,30 @@ async function generateOnboarding(subject: string): Promise<any> {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ subject })
+        });
+
+        // Vérification du statut de la réponse
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP : statut ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Réponse du webhook:', data);
+        return data;
+    } catch (error) {
+        console.error('Erreur lors de l\'appel du webhook:', error);
+        throw error;
+    }
+}
+
+async function generateFeedback(plan:LearningPlan, user_message: string, conversation_history:string): Promise<any> {
+    try {
+        const response = await fetch('https://curious-tree-journey.onrender.com/api/feedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ plan, user_message, conversation_history })
         });
 
         // Vérification du statut de la réponse
