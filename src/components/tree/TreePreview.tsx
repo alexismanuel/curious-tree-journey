@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ConversationPanel } from "./ConversationPanel";
-import { Button } from "../ui/button";
 import { Message, TreeData } from "@/types/tree";
 
 interface TreePreviewProps {
