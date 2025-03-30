@@ -26,6 +26,7 @@ async function generatePlanningTree(subject: string, context: string): Promise<a
     try {
         const response = await fetch('https://curious-tree-journey.onrender.com/api/plan', {
             method: 'POST',
+            mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -91,15 +92,18 @@ async function sendCreateCourse(plan: LearningPlan): Promise<any> {
 }
 
 async function chatWithAI(context : string, message: string): Promise<any> {
+    console.log("Contexte:", context);
+    console.log("Message:", message);
     try {
-        const response = await fetch('https://hook.eu1.make.com/mo2jx6wnssgv9nu4r3wqxx9t2molek13', {
+        const response = await fetch('https://curious-tree-journey.onrender.com/api/chat', {
             method: 'POST',
+            mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ context, message })
         });
-
+        console.log("Réponse du webhook:", response);
         // Vérification du statut de la réponse
         if (!response.ok) {
             throw new Error(`Erreur HTTP : statut ${response.status}`);
@@ -107,8 +111,8 @@ async function chatWithAI(context : string, message: string): Promise<any> {
 
         // Conversion de la réponse en JSON et retour
         const jsonResponse = await response.json();
-        const data = jsonResponse.reponse;
-        console.log('Réponse du webhook:', data);
+        const data = jsonResponse.response;
+        console.log('Réponse de l api:', data);
         return data;
     } catch (error) {
         console.error('Erreur lors de l\'appel du webhook:', error);
@@ -120,6 +124,7 @@ async function generateOnboarding(subject: string): Promise<any> {
     try {
         const response = await fetch('https://curious-tree-journey.onrender.com/api/context', {
             method: 'POST',
+            mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -144,6 +149,7 @@ async function generateFeedback(context: string, current_plan:LearningPlan, user
     try {
         const response = await fetch('https://curious-tree-journey.onrender.com/api/feedback', {
             method: 'POST',
+            mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             },
