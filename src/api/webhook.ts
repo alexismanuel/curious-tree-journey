@@ -66,6 +66,7 @@ async function sendCreateCourse(plan: LearningPlan): Promise<any> {
         }
 
         const data = await response.json();
+        console.log('Réponse de l API:', data);
         
         // Return the data with chapters for EditConversation
         return {
