@@ -66,6 +66,7 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
   const [coursePlan, setCoursePlan] = useState<CoursePlan | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const plan = getFromLocalStorage("coursePlan", null);
@@ -84,7 +85,13 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length === 1) {
+      // For initial message, scroll to top
+      containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      // For subsequent messages, scroll to bottom
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -124,12 +131,12 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
 
   return (
     <motion.div
-      className="w-full h-full flex flex-col"
+      className="w-full h-[calc(100vh-4rem)] flex flex-col"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+      <div ref={containerRef} className="flex-1 overflow-y-auto px-4 py-6 scroll-smooth min-h-0">
         <div className="max-w-xl mx-auto">
           <div className="space-y-4">
             <AnimatePresence mode="popLayout">
@@ -165,7 +172,7 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="sticky bottom-0 left-0 right-0 p-4 bg-white border-t">
+      <form onSubmit={handleSubmit} className="flex-shrink-0 sticky bottom-0 left-0 right-0 p-4 bg-white border-t">
         <div className="max-w-xl mx-auto">
           <div className="flex gap-2">
             <Input
