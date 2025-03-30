@@ -74,6 +74,13 @@ export const ConversationPanel = ({
   }, [messages]);
 
   const handleSubmit = async () => {
+    const conversationHistoryString = [
+      "System: Tu es un assistant sympas",
+      ...localMessages.map(message =>
+        `${message.sender === "user" ? "User" : "Assistant"}: ${message.content}`
+      )
+    ].join("\n");
+
     if (!input.trim() || isLoading || disabled) return;
 
     if (onSendMessage) {
@@ -94,7 +101,7 @@ export const ConversationPanel = ({
     setLocalLoading(true);
 
     try {
-      const response = await chatWithAI("Tu es un assistant sympas", userMessage.content);
+      const response = await chatWithAI(conversationHistoryString, userMessage.content);
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
