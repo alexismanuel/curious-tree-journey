@@ -33,7 +33,7 @@ export const PathView = ({ learningGoal, treeData: initialTreeData }: { learning
     if (latestNode.status === "locked") {
       toast({
         title: "Node Locked",
-        description: "Complete the previous nodes to unlock this one.",
+        description: "Complétez le chapitre précédent pour avancer.",
         variant: "destructive"
       });
       return;

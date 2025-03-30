@@ -1,11 +1,11 @@
-async function generatePlanningTree(tree: string): Promise<any> {
+async function generatePlanningTree(subject: string, context: string): Promise<any> {
     try {
-        const response = await fetch('https://hook.eu1.make.com/ihmym1n82oq1hqb7sa83fa5n5mwa8v48', {
+        const response = await fetch('https://curious-tree-journey.onrender.com/api/plan', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ tree })
+            body: JSON.stringify({ context, subject })
         });
 
         // Vérification du statut de la réponse
@@ -109,4 +109,28 @@ async function chatWithAI(context : string, message: string): Promise<any> {
     }
 }
 
-export { sendCreateCourse, chatWithAI, generatePlanningTree };
+async function generateOnboarding(subject: string): Promise<any> {
+    try {
+        const response = await fetch('https://curious-tree-journey.onrender.com/api/context', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subject })
+        });
+
+        // Vérification du statut de la réponse
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP : statut ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Réponse du webhook:', data);
+        return data;
+    } catch (error) {
+        console.error('Erreur lors de l\'appel du webhook:', error);
+        throw error;
+    }
+}
+
+export { sendCreateCourse, chatWithAI, generatePlanningTree, generateOnboarding };

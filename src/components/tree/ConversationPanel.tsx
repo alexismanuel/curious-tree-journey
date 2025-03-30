@@ -66,7 +66,7 @@ export const ConversationPanel = ({
       id: Date.now().toString(),
       sender: "user",
       content: input.trim(),
-      timestamp: new Date().toLocaleTimeString()
+      timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -83,7 +83,7 @@ export const ConversationPanel = ({
         id: (Date.now() + 1).toString(),
         sender: "ai",
         content: response, // Adaptez cette propriété en fonction de la réponse de votre API
-        timestamp: new Date().toLocaleTimeString()
+        timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
       };
 
       // Ajout du message AI dans la conversation

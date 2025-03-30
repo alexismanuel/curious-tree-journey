@@ -18,3 +18,17 @@ export interface Message {
   content: string;
   timestamp: string;
 }
+
+export interface Chapitre {
+  id: string;
+  title: string;
+  prerequisites: string[];
+  contenu: string | { [key: string]: string }; // Contenu peut être une chaîne ou un objet
+}
+
+export interface DataChapter {
+  titre: string;
+  description: string;
+  id: string;
+  chapitres: Chapitre[];
+}

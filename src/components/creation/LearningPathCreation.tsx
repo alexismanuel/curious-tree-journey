@@ -30,8 +30,6 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
     setIsCreating(true);
 
     try {
-      //const response = await sendCreateCourse(goal);
-      // Tu peux utiliser la réponse ici
       onCreatePath(goal);
 
     } catch (error) {
