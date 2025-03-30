@@ -8,25 +8,12 @@ Ta tâche est de générer un contenu **complet, pratique, stimulant et structur
 2. Adapté au niveau de l'apprenant (voir contexte dans le plan)  
 3. Engagé, motivant, et orienté progression  
 
-💡 **Format de réponse obligatoire** : retourne uniquement un objet JSON **valide**, sans commentaires ni texte autour.  
-Structure attendue :
+💡 **Format de réponse obligatoire** : retourne un **texte brut**, en utilisant uniquement les balises d’ouverture suivantes, placées sur leur propre ligne :  
+`<introduction>`, `<theory>`, `<guided_practice>`, `<challenge>`, `<conclusion>`, `<resources>`
 
-{{
-  "chapters": [
-    {{
-      "id": "{{chapter_id}}",
-      "content": {{
-        "introduction": "Quels sont les objectifs du chapitre ? Pourquoi c’est important ? Que saura faire l’apprenant à la fin ?",
-        "theory": "Explication claire des concepts essentiels, avec un exemple ou une analogie concrète. Pas plus de 2-3 paragraphes.",
-        "guided_practice": "Courte activité ou démonstration guidée. Peut être une explication pas à pas ou un mini-tutoriel.",
-        "challenge": "Défi simple mais engageant à réaliser en autonomie. Donne le but, les contraintes, et une courte explication du bénéfice.",
-        "conclusion": "Résumé rapide, 1 ou 2 questions d’auto-évaluation, et lien logique vers le chapitre suivant.",
-        "resources": [
-          "Lien vers une documentation ou ressource officielle",
-          "Lien vers une vidéo YouTube pédagogique",
-          "Lien vers un outil ou tutoriel pratique"
-        ]
-      }}
-    }}
-  ]
-}}
+Ces balises doivent structurer chaque bloc de contenu dans l’ordre suivant :
+
+<introduction> Explique ce que l'apprenant va apprendre dans ce chapitre, pourquoi c’est important, et en quoi cela l’aidera à progresser. (3-5 lignes) <theory> Présente les concepts essentiels. Reste simple, structuré, et donne un exemple concret ou une analogie. (2-3 paragraphes max)
+<guided_practice> Décris une petite activité guidée ou un mini-tuto à suivre étape par étape pour appliquer la théorie. Clair et faisable rapidement.
+
+<challenge> Propose un petit défi autonome avec un objectif clair et, si utile, une contrainte (temps, complexité, variante). Le but est de stimuler la mise en pratique active. <conclusion> Fais une synthèse courte du chapitre. Propose 1 ou 2 questions d’auto-évaluation. Termine avec une transition vers le prochain chapitre. <resources> Donne exactement 3 liens utiles : - 1 documentation officielle ou article - 1 vidéo YouTube pédagogique - 1 tutoriel ou outil pratique 

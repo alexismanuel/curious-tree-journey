@@ -289,29 +289,34 @@ export const useTreeStore = create<TreeState>((set, get) => ({
     set((state) => {
       if (!state.treeData) return state;
       
+      const unlockDownstreamNodes = (node: Node): Node => {
+        if (node.id === nodeId) {
+          // Mark the completed node
+          node = { ...node, status: "completed" as NodeStatus };
+        }
+
+        if (node.children && node.children.length > 0) {
+          // If this is the completed node or one of its ancestors,
+          // unlock all children and process them recursively
+          const isCompletedNodeOrAncestor = node.id === nodeId || 
+            node.children.some(child => child.id === nodeId);
+
+          return {
+            ...node,
+            children: node.children.map(child => ({
+              ...child,
+              status: isCompletedNodeOrAncestor && child.status === "locked" ? 
+                ("upcoming" as NodeStatus) : child.status,
+              children: unlockDownstreamNodes(child).children
+            }))
+          };
+        }
+
+        return node;
+      };
+
       const updateNodeStatus = (nodes: Node[]): Node[] => {
-        return nodes.map(n => {
-          if (n.id === nodeId) {
-            return { ...n, status: "completed" as NodeStatus };
-          }
-          
-          if (n.id === nodeId && n.children) {
-            return {
-              ...n,
-              status: "completed" as NodeStatus,
-              children: n.children.map(child => ({
-                ...child,
-                status: child.status === "locked" ? ("upcoming" as NodeStatus) : child.status
-              }))
-            };
-          }
-          
-          if (n.children) {
-            return { ...n, children: updateNodeStatus(n.children) };
-          }
-          
-          return n;
-        });
+        return nodes.map(node => unlockDownstreamNodes({ ...node }));
       };
       
       const updatedRootNode = state.treeData.rootNode.id === nodeId 

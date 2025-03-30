@@ -71,7 +71,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-white overflow-hidden">
       {/* Macott character background */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-x-0 bottom-0 w-full h-[90vh]">
+        <div className="absolute inset-x-0 bottom-0 w-full h-[80vh]">
           <div className="relative w-full h-full">
             {/* Background color with wave shape */}
             <div
