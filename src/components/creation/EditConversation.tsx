@@ -4,9 +4,10 @@ import { Loader2, Send, User, Sparkles, Home, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Message, Node, TreeData } from "@/types/tree";
+import { Message, Node, TreeData, CoursePlan } from "@/types/tree";
 import { generateInitialMessages } from "@/lib/conversation-generator";
 import { chatWithAI } from "@/api/webhook";
+import { getFromLocalStorage } from "@/utils/localStorage";
 
 const ChatMessage = forwardRef<HTMLDivElement, { message: Message }>((props, ref) => {
   const { message } = props;
@@ -44,6 +45,14 @@ interface EditConversationProps {
 export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversationProps) => {
   const [goal, setGoal] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [coursePlan, setCoursePlan] = useState<CoursePlan | null>(null);
+
+  useEffect(() => {
+    const plan = getFromLocalStorage("coursePlan", null);
+    if (plan) {
+      setCoursePlan(plan);
+    }
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -83,10 +92,10 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
           <p className="text-lg">
             Super choix ! Voici le déroulé de votre formation :
           </p>
-          
+
           <div className="space-y-3 pl-4">
-            {treeData.rootNode.children.map((chapter: Node, index: number) => (
-              <div key={chapter.id} className="flex items-center gap-3">
+            {coursePlan?.chapters?.map((chapter, index: number) => (
+              <div key={chapter.id || index} className="flex items-center gap-3">
                 <div className="w-1 h-4 bg-primary rounded-full"></div>
                 <p><strong>Chapitre {index + 1} :</strong> {chapter.title}</p>
               </div>
@@ -102,14 +111,22 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
             <Button
               onClick={handleStart}
               className="bg-black text-white hover:bg-black/90 px-6"
+              disabled={isLoading}
             >
-              C'est parti !
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Chargement...
+                </>
+              ) : (
+                "C'est parti !"
+              )}
             </Button>
           </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="sticky bottom-0 left-0 right-0 p-4 bg-white border-t">
+      <form onSubmit={handleSubmit} className="sticky bottom-0 left-0 right-0 p-4 bg-white">
         <div className="max-w-xl mx-auto">
           <Input
             value={goal}

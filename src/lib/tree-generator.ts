@@ -33,65 +33,67 @@ interface Chapter {
  * @returns La structure d'arbre générée
  */
 export const generateTreeFromCourseData = (courseData: NewCourseFormat): TreeData => {
-  // Créer le nœud racine
+  // Create root node
   const rootNode: Node = {
-    id: "root",
-    title: "Commencer ici",
-    description: courseData.description,
+    id: courseData.id || "root",
+    title: courseData.title || "Commencer ici",
+    description: courseData.description || "",
     status: "active",
     children: []
   };
   
-  // Créer un dictionnaire pour accéder facilement aux nœuds par ID
+  // Create node map for easy access
   const nodeMap: Record<string, Node> = {
-    "root": rootNode
+    [rootNode.id]: rootNode
   };
   
-  // Créer les nœuds pour chaque chapitre
+  // Create nodes for each chapter
   courseData.chapters.forEach((chapter) => {
     const chapterNode: Node = {
       id: chapter.id,
       title: chapter.title,
-      description: "", // Pas de description détaillée dans le nouveau format
-      status: "locked", // Par défaut tous les chapitres sont verrouillés
-      children: []
+      description: chapter.content?.explanation || "",
+      status: "locked",
+      children: [],
+      content: chapter.content,
+      prerequisites: chapter.prerequisites || []
     };
     
-    // Ajouter le nœud au dictionnaire
     nodeMap[chapter.id] = chapterNode;
   });
   
-  // Établir les relations parent-enfant en fonction des prérequis
+  // Build parent-child relationships
   courseData.chapters.forEach((chapter) => {
     const chapterNode = nodeMap[chapter.id];
+    const prerequisites = chapter.prerequisites || [];
     
-    if (chapter.prerequisites.length === 0) {
-      // Chapitre sans prérequis, donc directement rattaché à la racine
+    if (prerequisites.length === 0) {
+      // No prerequisites, attach to root
       rootNode.children.push(chapterNode);
-      // Le premier chapitre sans prérequis sera en "upcoming"
+      // First chapter without prerequisites will be upcoming
       if (chapterNode.status === "locked" && rootNode.children.length === 1) {
         chapterNode.status = "upcoming";
       }
     } else {
-      // Chapitre avec prérequis, on l'attache au dernier prérequis
-      const lastPrereqId = chapter.prerequisites[chapter.prerequisites.length - 1];
-      const parentNode = nodeMap[lastPrereqId];
-      if (parentNode) {
-        parentNode.children.push(chapterNode);
+      // Find the last prerequisite that exists in our node map
+      const lastPrereq = prerequisites
+        .slice()
+        .reverse()
+        .find(prereqId => nodeMap[prereqId]);
+      
+      if (lastPrereq && nodeMap[lastPrereq]) {
+        nodeMap[lastPrereq].children.push(chapterNode);
       } else {
-        console.warn(`Parent node with ID ${lastPrereqId} not found for chapter ${chapter.id}`);
-        // Fallback: attacher à la racine
+        // If no valid prerequisite found, attach to root
+        console.warn(`No valid prerequisites found for chapter ${chapter.id}, attaching to root`);
         rootNode.children.push(chapterNode);
       }
     }
   });
   
-  // Créer la liste complète de tous les nœuds
-  const allNodes = Object.values(nodeMap);
-  
   return {
     rootNode,
-    nodes: allNodes
+    nodes: Object.values(nodeMap)
   };
 };
 

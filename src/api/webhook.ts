@@ -52,43 +52,38 @@ async function generatePlanningTree(subject: string, context: string): Promise<a
  * @returns La réponse de l'API contenant le plan d'apprentissage avec le contenu généré
  */
 async function sendCreateCourse(plan: LearningPlan): Promise<any> {
-    // Affichages de débogage détaillés
-    console.log('Envoie de la requête');
-    console.log('Type de learningPlan:', typeof plan);
-    
-    // Préparons le corps de la requête avec des logs - envoyons directement l'objet sans l'envelopper
-    const requestBody = JSON.stringify({plan: plan});
-    console.log('Corps de la requête:', requestBody);
-    
     try {
         const response = await fetch('https://curious-tree-journey.onrender.com/api/generate_content', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: requestBody
+            body: JSON.stringify({ plan })
         });
-        
-        console.log('Statut de la réponse:', response.status);
-        
-        // On récupère d'abord le texte brut pour voir s'il y a un problème
-        const rawText = await response.text();
-        console.log('Réponse brute:', rawText);
-        
-        // Puis on essaie de le parser en JSON si possible
-        let data;
-        try {
-            data = JSON.parse(rawText);
-            console.log('Réponse JSON parsée:', data);
-        } catch (parseError) {
-            console.error('Impossible de parser la réponse en JSON:', parseError);
-            // On retourne quand même le texte brut
-            return rawText;
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const data = await response.json();
         
-        return data;
+        // Return the data with chapters for EditConversation
+        return {
+            title: data.title,
+            description: data.description,
+            chapters: data.chapters,
+            // Keep the tree structure for other components
+            rootNode: {
+                id: 'root',
+                title: data.title,
+                description: data.description,
+                status: 'active',
+                children: []
+            },
+            nodes: []
+        };
     } catch (error) {
-        console.error('Erreur lors de l\'appel de l\'API:', error);
+        console.error('Error calling API:', error);
         throw error;
     }
 }
@@ -166,5 +161,6 @@ async function generateFeedback(plan:LearningPlan, user_message: string, convers
         throw error;
     }
 }
+
 
 export { sendCreateCourse, chatWithAI, generatePlanningTree, generateOnboarding, generateFeedback };

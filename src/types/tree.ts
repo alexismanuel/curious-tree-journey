@@ -5,6 +5,18 @@ export interface Node {
   status: "active" | "completed" | "upcoming" | "locked";
   children: Node[];
   tags?: string[];
+  content?: string;
+  prerequisites?: string[];
+}
+
+export interface CoursePlan {
+  title: string;
+  description: string;
+  chapters: Array<{
+    id: string;
+    title: string;
+    prerequisites: string[];
+  }>;
 }
 
 export interface TreeData {
@@ -27,8 +39,8 @@ export interface Chapitre {
 }
 
 export interface DataChapter {
-  titre: string;
+  title: string;
   description: string;
   id: string;
-  chapitres: Chapitre[];
+  chapters: Chapitre[];
 }

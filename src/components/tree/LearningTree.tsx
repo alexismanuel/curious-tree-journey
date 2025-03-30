@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import { Progress } from "@/components/ui/progress";
 import { TreeData, Node } from "@/types/tree";
 import { TreeVisualization } from "./TreeVisualization";
 import { ConversationPanel } from "./ConversationPanel";
 import { LoadingBarChapter } from "../ui/LoadingBarChapter";
 import { sendCreateCourse } from "@/api/webhook";
-import { saveToLocalStorage, getFromLocalStorage} from "@/utils/localStorage";
-import { get } from "http";
+import { saveToLocalStorage, getFromLocalStorage } from "@/utils/localStorage";
 
 export const PathView = ({
   learningGoal,
@@ -71,9 +69,10 @@ export const PathView = ({
     const initCourse = async () => {
       setIsLoading(true);
       try {
-        // Ici, il faut disposer d'une réponse initiale.
-        // Vous pouvez définir "initialResponse" selon votre logique.
         const planJSON = getFromLocalStorage("coursePlan", null);
+        if (!planJSON) {
+          throw new Error("No course plan found");
+        }
         const courseData = await sendCreateCourse(planJSON);
         saveToLocalStorage("courseData", courseData);
       } catch (error) {
