@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from .models import (
     ContextRequest, PlanRequest, LearningPlan, ContentRequest,
     FeedbackRequest, FeedbackResponse, APIError, LLMParsingError,
-    ChatRequest, ChatResponse, Message, ChapterContent
+    ChatRequest, ChatResponse, ChapterContent
 )
 from .chat import chat_with_assistant
 from .llm import (
@@ -43,45 +43,13 @@ async def api_error_handler(request, exc: APIError):
 async def chat(request: ChatRequest) -> ChatResponse:
     """Chat with the learning assistant about the current topic."""
     try:
-        # Find the current chapter object and extract prev/next chapters
-        current_chapter = None
-        prev_chapters = []
-        next_chapters = []
-        found_current = False
-        
-        for chapter in request.plan.chapters:
-            if chapter.id == request.current_chapter:
-                current_chapter = chapter
-                found_current = True
-            elif not found_current:
-                prev_chapters.append(chapter)
-            else:
-                next_chapters.append(chapter)
-        
-        if not current_chapter:
-            raise APIError(f"Current chapter {request.current_chapter} not found in plan")
-        
-        # Get response from assistant
+        # Get response from assistant with simplified context
         response = chat_with_assistant(
-            context=request.plan.description,  # Use plan description as context
-            current_chapter=current_chapter.dict(),
-            prev_chapters=[ch.dict() for ch in prev_chapters],
-            next_chapters=[ch.dict() for ch in next_chapters],
-            conversation_history=request.conversation_history,
+            context=request.context,
             message=request.message
         )
         
-        # Update conversation history with the new exchange
-        updated_history = list(request.conversation_history)
-        updated_history.extend([
-            Message(role="USER", content=request.message),
-            Message(role="ASSISTANT", content=response)
-        ])
-        
-        return ChatResponse(
-            response=response,
-            conversation_history=updated_history
-        )
+        return ChatResponse(response=response)
     except Exception as e:
         raise APIError(
             message="Failed to process chat message",
