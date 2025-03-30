@@ -81,7 +81,7 @@ export const PathView = ({
 
     toast({
       title: "Node Completed",
-      description: "Great job! You can now move on to the next topic.",
+      description: "Bien joué! Tu peux passer au chapitre suivant.",
     });
   };
 

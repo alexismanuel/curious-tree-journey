@@ -12,7 +12,7 @@ interface NewCourseFormat {
     objectif: string;
     délai: string;
     préférences: string;
-    [key: string]: any; // Pour gérer d'autres clés potentielles
+    [key: string]: any;
   };
   chapters: Chapter[];
 }
@@ -24,31 +24,21 @@ interface Chapter {
   id: string;
   title: string;
   prerequisites: string[];
-  [key: string]: any; // Pour gérer d'autres clés potentielles
+  [key: string]: any;
 }
 
 /**
- * Génère une structure d'arbre hiérarchique à partir des données de cours au nouveau format
- * @param courseData - Les données de cours au nouveau format à transformer en arbre
+ * Génère une structure d'arbre hiérarchique à partir des données de cours
+ * sans inclure le node « Commencer ici » si possible.
+ * - Si un seul chapitre de premier niveau existe, il devient la racine.
+ * - Sinon, on crée une racine virtuelle avec un titre vide.
+ * @param courseData - Les données de cours au nouveau format
  * @returns La structure d'arbre générée
  */
 export const generateTreeFromCourseData = (courseData: NewCourseFormat): TreeData => {
-  // Create root node
-  const rootNode: Node = {
-    id: courseData.id || "root",
-    title: courseData.title || "Commencer ici",
-    description: courseData.description || "",
-    status: "active",
-    children: []
-  };
-
-  // Create node map for easy access
-  const nodeMap: Record<string, Node> = {
-    [rootNode.id]: rootNode
-  };
-
-  // Create nodes for each chapter
-  courseData.chapters.forEach((chapter) => {
+  // Création de tous les nodes correspondant aux chapitres
+  const nodeMap: Record<string, Node> = {};
+  courseData.chapters.forEach(chapter => {
     const chapterNode: Node = {
       id: chapter.id,
       title: chapter.title,
@@ -58,42 +48,54 @@ export const generateTreeFromCourseData = (courseData: NewCourseFormat): TreeDat
       content: chapter.content,
       prerequisites: chapter.prerequisites || []
     };
-
     nodeMap[chapter.id] = chapterNode;
   });
 
-  // Build parent-child relationships
-  courseData.chapters.forEach((chapter) => {
-    const chapterNode = nodeMap[chapter.id];
-    const prerequisites = chapter.prerequisites || [];
-
-    if (prerequisites.length === 0) {
-      // No prerequisites, attach to root
-      rootNode.children.push(chapterNode);
-      // First chapter without prerequisites will be upcoming
-      if (chapterNode.status === "locked" && rootNode.children.length === 1) {
-        chapterNode.status = "upcoming";
+  // Récupérer les nodes de premier niveau (sans prérequis ou avec prérequis invalides)
+  const topLevelNodes: Node[] = [];
+  courseData.chapters.forEach(chapter => {
+    const currentNode = nodeMap[chapter.id];
+    if (chapter.prerequisites && chapter.prerequisites.length > 0) {
+      // On prend le dernier prérequis valide, le cas échéant
+      const lastPrereqId = [...chapter.prerequisites].reverse().find(prereqId => nodeMap[prereqId]);
+      if (lastPrereqId && nodeMap[lastPrereqId]) {
+        nodeMap[lastPrereqId].children.push(currentNode);
+      } else {
+        topLevelNodes.push(currentNode);
       }
     } else {
-      // Find the last prerequisite that exists in our node map
-      const lastPrereq = prerequisites
-        .slice()
-        .reverse()
-        .find(prereqId => nodeMap[prereqId]);
-
-      if (lastPrereq && nodeMap[lastPrereq]) {
-        nodeMap[lastPrereq].children.push(chapterNode);
-      } else {
-        // If no valid prerequisite found, attach to root
-        console.warn(`No valid prerequisites found for chapter ${chapter.id}, attaching to root`);
-        rootNode.children.push(chapterNode);
-      }
+      topLevelNodes.push(currentNode);
     }
   });
 
+  // Définir le statut "upcoming" sur le premier node de premier niveau, s'il est "locked"
+  if (topLevelNodes.length > 0 && topLevelNodes[0].status === "locked") {
+    topLevelNodes[0].status = "upcoming";
+  }
+
+  // Si un seul node de premier niveau, il devient la racine, sinon on crée une racine virtuelle
+  let rootNode: Node;
+  if (topLevelNodes.length === 1) {
+    rootNode = topLevelNodes[0];
+  } else {
+    rootNode = {
+      id: "virtual-root",
+      title: "", // Titre vide pour ne rien afficher
+      description: "",
+      status: "active",
+      children: topLevelNodes
+    };
+  }
+
+  // Fonction récursive pour rassembler tous les nodes de l'arbre
+  const gatherNodes = (node: Node): Node[] => {
+    return [node, ...node.children.flatMap(child => gatherNodes(child))];
+  };
+  const allNodes = gatherNodes(rootNode);
+
   return {
     rootNode,
-    nodes: Object.values(nodeMap)
+    nodes: allNodes
   };
 };
 
@@ -107,7 +109,6 @@ export const parseCourseData = (jsonData: string): NewCourseFormat => {
     return JSON.parse(jsonData) as NewCourseFormat;
   } catch (error) {
     console.error("Erreur lors de l'analyse des données de cours:", error);
-    // Retourner une structure vide en cas d'erreur
     return {
       id: "",
       title: "",
