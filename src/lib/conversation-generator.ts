@@ -8,6 +8,17 @@ export const generateInitialMessages = (node: Node): Message[] => {
   const chapterContent = DataChapter.chapters.find((chap: chapters) => chap.id === node.id)?.content ?? "null";
   console.log("Chapter Content:", chapterContent);
 
+  if(node.id === "root") {
+    return [
+      {
+        id: "1",
+        sender: "ai",
+        content: `Bienvenue dans Learn Anything ! Vous pouvez explorer les chapitres dans les autres noeuds ou me poser des questions générales sur le cours`,
+        timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
+      }
+    ];
+  }
+
   // If the node is already completed, return a summary conversation
   if (node.status === "completed") {
     return [

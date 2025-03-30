@@ -35,7 +35,7 @@ interface Chapter {
 export const generateTreeFromCourseData = (courseData: NewCourseFormat): TreeData => {
   // Create root node
   const rootNode: Node = {
-    id: courseData.id || "root",
+    id: "root",
     title: courseData.title || "Commencer ici",
     description: courseData.description || "",
     status: "active",

@@ -26,7 +26,6 @@ async function generatePlanningTree(subject: string, context: string): Promise<a
     try {
         const response = await fetch('https://curious-tree-journey.onrender.com/api/plan', {
             method: 'POST',
-            mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -40,7 +39,7 @@ async function generatePlanningTree(subject: string, context: string): Promise<a
 
         // Conversion de la réponse en JSON et retour
         const data = await response.json();
-        console.log('Réponse du webhook:', data);
+        console.log('Réponse de l api:', data);
         return data;
     } catch (error) {
         console.error('Erreur lors de l\'appel du webhook:', error);
@@ -149,7 +148,6 @@ async function generateFeedback(context: string, current_plan:LearningPlan, user
     try {
         const response = await fetch('https://curious-tree-journey.onrender.com/api/feedback', {
             method: 'POST',
-            mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             },

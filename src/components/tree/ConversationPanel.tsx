@@ -79,8 +79,16 @@ export const ConversationPanel = ({
     const DataChapter = getFromLocalStorage("courseData", null);
     const chapterContent = DataChapter.chapters.find((chap: chapters) => chap.id === node.id)?.content ?? "null";
 
+    let systemPrompt = "System: Tu es un professeur qui doit expliquer et aider l'utilisateur à l'apprendre.";
+
+    if (node.id === "root") {
+      systemPrompt += ` Voici l’introduction générale du cours. Sois clair, bienveillant et pédagogique. Contenu du cours : ${JSON.stringify(DataChapter, null, 2)}`;
+    } else {
+      systemPrompt += ` Voici le contenu du chapitre : ${JSON.stringify(chapterContent, null, 2)}`;
+    }
+    
     const conversationHistoryString = [
-      "System: Tu es un professeur qui doit expliquer et aider l'utilisateur à l'apprendre, voici le contenu du chapitre :",
+      systemPrompt,
       ...localMessages.map(message =>
         `${message.sender === "user" ? "User" : "Assistant"}: ${message.content}`
       )
