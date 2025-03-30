@@ -24,21 +24,48 @@ export const generateInitialMessages = (node: Node): Message[] => {
   const messages: Message[] = [];
   
   // Add explanation message if available
-  if (chapterContent?.explanation) {
+  if (chapterContent?.introduction) {
     messages.push({
-      id: "explanation",
+      id: "introduction",
       sender: "ai",
-      content: chapterContent.explanation,
+      content: chapterContent.introduction,
       timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
     });
   }
 
   // Add tips message if available
-  if (chapterContent?.tips) {
+  if (chapterContent?.theory) {
     messages.push({
-      id: "tips",
+      id: "theory",
       sender: "ai",
-      content: `💡 Conseils :\n${chapterContent.tips}`,
+      content: chapterContent.theory,
+      timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
+    });
+  }
+
+  if (chapterContent?.guided_practice) {
+    messages.push({
+      id: "guided_practice",
+      sender: "ai",
+      content: chapterContent.guided_practice,
+      timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
+    });
+  }
+
+  if (chapterContent?.challenge) {
+    messages.push({
+      id: "challenge",
+      sender: "ai",
+      content: chapterContent.challenge,
+      timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
+    });
+  }
+
+  if (chapterContent?.conclusion) {
+    messages.push({
+      id: "conclusion",
+      sender: "ai",
+      content: chapterContent.conclusion,
       timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
     });
   }

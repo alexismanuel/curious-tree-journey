@@ -81,7 +81,6 @@ export const ConversationPanel = ({
 
     const conversationHistoryString = [
       "System: Tu es un professeur qui doit expliquer et aider l'utilisateur à l'apprendre, voici le contenu du chapitre :",
-      `\n${chapterContent}\n`,
       ...localMessages.map(message =>
         `${message.sender === "user" ? "User" : "Assistant"}: ${message.content}`
       )
