@@ -35,33 +35,53 @@ const ChatMessage = forwardRef<HTMLDivElement, { message: Message }>((props, ref
 
 ChatMessage.displayName = "ChatMessage";
 
-export const ConversationPanel = ({
-  node,
-  onComplete,
-  onBack
-}: {
+interface ConversationPanelProps {
   node: Node;
+  messages?: Message[];
   onComplete: () => void;
   onBack: () => void;
-}) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  onSendMessage?: (message: string) => void;
+  isLoading?: boolean;
+  disabled?: boolean;
+}
+
+export const ConversationPanel = ({
+  node,
+  messages: externalMessages,
+  onComplete,
+  onBack,
+  onSendMessage,
+  isLoading: externalLoading = false,
+  disabled = false
+}: ConversationPanelProps) => {
+  const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const messages = externalMessages || localMessages;
+  const isLoading = externalLoading || localLoading;
+
   useEffect(() => {
-    const initialMessages = generateInitialMessages(node);
-    setMessages(initialMessages);
-  }, [node]);
+    if (!externalMessages) {
+      const initialMessages = generateInitialMessages(node);
+      setLocalMessages(initialMessages);
+    }
+  }, [node, externalMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSubmit = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || disabled) return;
 
-    // Création et ajout du message utilisateur
+    if (onSendMessage) {
+      onSendMessage(input.trim());
+      setInput("");
+      return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       sender: "user",
@@ -69,30 +89,25 @@ export const ConversationPanel = ({
       timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setLocalMessages(prev => [...prev, userMessage]);
     setInput("");
-    setIsLoading(true);
+    setLocalLoading(true);
 
     try {
-      // Appel à l'API avec le contexte et le message utilisateur
-      // Ici, j'assume que "node" possède une propriété "context" que vous transmettez.
       const response = await chatWithAI("Tu es un assistant sympas", userMessage.content);
 
-      // Construction du message AI en fonction de la réponse (adaptez "response.reply" selon votre API)
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
-        content: response, // Adaptez cette propriété en fonction de la réponse de votre API
+        content: response,
         timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
       };
 
-      // Ajout du message AI dans la conversation
-      setMessages(prev => [...prev, aiMessage]);
+      setLocalMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error("Erreur lors de l'appel à chatWithAI:", error);
-      // Vous pouvez également afficher un message d'erreur dans l'interface ici
+      console.error("Error sending message:", error);
     } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
   };
 

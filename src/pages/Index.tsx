@@ -8,9 +8,10 @@ import { ProgressDots } from "@/components/ui/progress-dots";
 import { generatePlanningTree, sendCreateCourse, generateOnboarding } from "@/api/webhook";
 import { saveToLocalStorage } from "@/utils/localStorage";
 import LoadingBar from "@/components/ui/LoadingBar";
+import { EditConversation } from "@/components/creation/EditConversation";
 
 const Index = () => {
-  const [stage, setStage] = useState<"creation" | "personalization" | "tree" | "loading">("creation");
+  const [stage, setStage] = useState<"creation" | "personalization" | "tree" | "loading" | "pathEdition">("creation");
   const [learningGoal, setLearningGoal] = useState<string>("");
   const [treeData, setTreeData] = useState<any>(null);
   const [onboardingData, setOnboardingData] = useState<any>(null);
@@ -36,13 +37,13 @@ const Index = () => {
       const courseData = await sendCreateCourse(response);
       saveToLocalStorage("courseData", courseData);
       console.log("Course Data:", courseData);
-      
+
       // Generate a tree locally without persisting
       const initialTree = generateTreeFromCourseData(response);
       setTreeData(initialTree);
-      
+
       // Show the tree visualization
-      setStage("tree");
+      setStage("pathEdition");
     } catch (error) {
       console.error("Error creating course:", error);
       setLoadingMessage("Une erreur est survenue. Veuillez réessayer.");
@@ -52,6 +53,15 @@ const Index = () => {
       }, 3000);
     }
   };
+
+  const handlePathEditionSubmit = async () => {
+    setStage("tree");
+  }
+
+  const handlePathChanges = async (details: string) => {
+    // TODO: Handle path changes
+    console.log("Path changes:", details);
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background overflow-hidden">
@@ -81,6 +91,7 @@ const Index = () => {
       >
         {stage === "creation" && <LearningPathCreation onCreatePath={handleCreatePath} />}
         {stage === "personalization" && <PersonalizationForm goal={learningGoal} onboardMsg={onboardingData} onSubmit={handlePersonalization} />}
+        {stage === "pathEdition" && <EditConversation treeData={treeData} onSubmit={handlePathChanges} onStart={handlePathEditionSubmit} />}
         {stage === "loading" && <LoadingBar message={loadingMessage} color="indigo" width={350} />}
         {stage === "tree" && <PathView learningGoal={learningGoal} treeData={treeData} />}
       </motion.div>
