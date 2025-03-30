@@ -28,14 +28,14 @@ export const PathView = ({
     const latestNode = treeData.nodes.find(n => n.id === node.id);
     if (!latestNode) return;
 
-    if (latestNode.status === "locked") {
+    /*if (latestNode.status === "locked") {
       toast({
         title: "Node Locked",
         description: "Complétez le chapitre précédent pour avancer.",
         variant: "destructive"
       });
       return;
-    }
+    }*/
     setActiveNode(latestNode);
   };
 
