@@ -18,7 +18,7 @@ const ChatMessage = forwardRef<HTMLDivElement, { message: Message; coursePlan?: 
   // Affichage du plan de cours
   const renderCoursePlan = () => {
     if (!coursePlan) return null;
-    
+
     return (
       <div className="space-y-4 mt-4 border-t pt-4">
         <p className="text-lg font-medium">Voici le plan de formation mis à jour :</p>
@@ -140,7 +140,7 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
 
       // Préparation du contexte
       const context = JSON.stringify(treeData);
-      
+
       // Appel à generateFeedback avec les paramètres requis
       const { response, plan } = await generateFeedback(
         context, // Le contexte en string
@@ -174,7 +174,7 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
       }
     } catch (error) {
       console.error("Error processing message:", error);
-      
+
       // Message d'erreur pour l'utilisateur
       const errorMessage: Message = {
         id: Date.now().toString(),
@@ -182,7 +182,7 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
         content: "Désolé, une erreur s'est produite lors du traitement de votre message. Veuillez réessayer.",
         timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
       };
-      
+
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
@@ -209,16 +209,16 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
           <div className="space-y-4">
             <AnimatePresence mode="popLayout">
               {messages.map(message => (
-                <ChatMessage 
-                  key={message.id} 
-                  message={message} 
+                <ChatMessage
+                  key={message.id}
+                  message={message}
                   coursePlan={coursePlan}
-                  showPlan={(message as Message & { showPlan?: boolean }).showPlan} 
+                  showPlan={(message as Message & { showPlan?: boolean }).showPlan}
                 />
               ))}
             </AnimatePresence>
             {isLoading && (
-              <motion.div 
+              <motion.div
                 className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -230,8 +230,9 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
             )}
             <div ref={messagesEndRef} />
           </div>
+		  </div>
 
-          <div className="flex justify-center pt-8">
+          <div className="flex justify-end mr-4 pt-8">
             <Button
               onClick={handleStart}
               className="bg-black text-white hover:bg-black/90 px-6"
@@ -247,6 +248,7 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
               )}
             </Button>
           </div>
+       <div className="max-w-xl mx-auto">
         </div>
       </div>
 

@@ -5,7 +5,6 @@ import { PersonalizationForm } from "@/components/creation/PersonalizationForm";
 import { PathView } from "@/components";
 import { generateTreeFromCourseData } from "@/lib/tree-generator";
 import { TreeData } from "@/types/tree";
-import { ProgressDots } from "@/components/ui/progress-dots";
 import { generatePlanningTree, generateOnboarding } from "@/api/webhook";
 import { saveToLocalStorage, getFromLocalStorage } from "@/utils/localStorage";
 import LoadingBar from "@/components/ui/LoadingBar";
