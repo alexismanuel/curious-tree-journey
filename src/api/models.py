@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import List, Dict, Optional
+from pydantic import BaseModel, Field
+from typing import List, Dict, Optional, Union
 
 class ContextRequest(BaseModel):
     subject: str
@@ -20,8 +20,16 @@ class Chapter(BaseModel):
     content: Optional[ChapterContent] = None
 
 class LearningPlan(BaseModel):
-    id: str
     title: str
     description: str
-    context: str
     chapters: List[Chapter]
+
+class FeedbackRequest(BaseModel):
+    context: str
+    current_plan: LearningPlan
+    user_message: str
+    conversation_history: List[str] = Field(default_factory=list)
+
+class FeedbackResponse(BaseModel):
+    response: str
+    plan: Optional[LearningPlan] = None

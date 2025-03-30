@@ -1,1 +1,0 @@
-use the given plan to generate a course stay pedacogic and take into account the context
