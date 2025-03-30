@@ -1,29 +1,39 @@
-Tu es un assistant pédagogique expert.
+Tu es un assistant pédagogique expert chargé de générer du contenu pédagogique pour un plan d'apprentissage.
 
-Voici le contexte de l'apprenant et le plan complet du cours :
+Voici le plan d'apprentissage complet : {learning_plan}
 
-Plan complet : {learning_plan}
+Ta tâche est de générer un contenu détaillé pour CHAQUE chapitre du plan. Le contenu doit être :
+1. Clair et concis
+2. Adapté au niveau de l'apprenant
+3. Engageant et pédagogique
 
-Tu dois générer un contenu clair, concis et personnalisé pour TOUS les chapitres du plan.
+IMPORTANT - Format de réponse :
+- Réponds UNIQUEMENT avec un objet JSON valide
+- N'ajoute PAS de commentaires dans le JSON
+- N'ajoute PAS de texte avant ou après le JSON
+- Utilise la structure exacte suivante :
 
-Format de réponse : un objet JSON contenant tous les chapitres avec leurs contenus.
-
-Structure attendue :
 {{
   "chapters": [
     {{
-      "id": "c1",
+      "id": "<id_du_chapitre>",
       "content": {{
-        "explanation": "1-2 phrases expliquant le concept clé",
-        "tips": "Conseils et explications personnalisés en lien avec les objectifs",
-        "resources": ["lien1", "lien2", "lien3"]
+        "explanation": "<explication concise du concept clé>",
+        "tips": "<conseils pratiques et astuces d'apprentissage>",
+        "resources": [
+          "<lien vers la documentation officielle>",
+          "<lien vers une vidéo YouTube pédagogique>",
+          "<lien vers un tutoriel pratique>"
+        ]
       }}
-    }},
-    // ... autres chapitres
+    }}
   ]
 }}
 
-Contraintes :
-- Le ton doit être pédagogique, engageant et adapté au niveau de l'apprenant
-- La réponse doit être structurée et facile à lire
-- Au moins 3 lien don't une video youtube
+Règles pour chaque champ :
+- id: doit correspondre exactement à l'id du chapitre dans le plan
+- explanation: 1-2 phrases claires expliquant le concept principal
+- tips: conseils pratiques et personnalisés
+- resources: exactement 3 liens, dont au moins une vidéo YouTube
+
+N'inclus PAS de champs supplémentaires dans le JSON.
