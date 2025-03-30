@@ -47,13 +47,13 @@ export const generateTreeFromCourseData = (courseData: NewCourseFormat): TreeDat
     [rootNode.id]: rootNode
   };
 
-  // Create nodes for each chapter
+  // Create nodes for each chapter)
   courseData.chapters.forEach((chapter) => {
     const chapterNode: Node = {
       id: chapter.id,
       title: chapter.title,
       description: chapter.content?.explanation || "",
-      status: "locked",
+      status: "active",
       children: [],
       content: chapter.content,
       prerequisites: chapter.prerequisites || []
