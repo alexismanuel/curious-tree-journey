@@ -5,14 +5,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Message, Node, TreeData, CoursePlan } from "@/types/tree";
-import { generateInitialMessages } from "@/lib/conversation-generator";
-import { chatWithAI } from "@/api/webhook";
 import { getFromLocalStorage } from "@/utils/localStorage";
+import { saveToLocalStorage } from "@/utils/localStorage";
 import { useScrollToBottom } from "@/hooks/useScrollToBottom";
+// Importation de la fonction generateFeedback
+import { generateFeedback } from "@/api/webhook";
 
-const ChatMessage = forwardRef<HTMLDivElement, { message: Message; coursePlan?: CoursePlan | null }>((props, ref) => {
-  const { message, coursePlan } = props;
+const ChatMessage = forwardRef<HTMLDivElement, { message: Message; coursePlan?: CoursePlan | null; showPlan?: boolean }>((props, ref) => {
+  const { message, coursePlan, showPlan = false } = props;
   const isAI = message.sender === "ai";
+
+  // Affichage du plan de cours
+  const renderCoursePlan = () => {
+    if (!coursePlan) return null;
+    
+    return (
+      <div className="space-y-4 mt-4 border-t pt-4">
+        <p className="text-lg font-medium">Voici le plan de formation mis à jour :</p>
+        <div className="space-y-3 pl-4">
+          {coursePlan.chapters.map((chapter, index) => (
+            <div key={chapter.id || index} className="flex items-center gap-3">
+              <div className="w-1 h-4 bg-primary rounded-full"></div>
+              <p><strong>Chapitre {index + 1} :</strong> {chapter.title}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <motion.div
@@ -44,7 +64,10 @@ const ChatMessage = forwardRef<HTMLDivElement, { message: Message; coursePlan?: 
               </div>
             </div>
           ) : (
-            <p className="text-sm leading-relaxed">{message.content}</p>
+            <div>
+              <p className="text-sm leading-relaxed">{message.content}</p>
+              {isAI && showPlan && renderCoursePlan()}
+            </div>
           )}
         </div>
         <span className="text-[11px] text-muted-foreground/80 px-1">{message.timestamp}</span>
@@ -88,10 +111,10 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
 
   useEffect(() => {
     if (messages.length === 1) {
-      // For initial message, scroll to top
+      // Pour le message initial, défilement vers le haut
       containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-      // For subsequent messages, scroll to bottom
+      // Pour les messages suivants, défilement vers le bas
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
@@ -112,11 +135,55 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
     setIsLoading(true);
 
     try {
+      // Création de l'historique des messages pour l'API
+      const messageHistory = messages.map(msg => msg.content);
+
+      // Préparation du contexte
+      const context = JSON.stringify(treeData);
+      
+      // Appel à generateFeedback avec les paramètres requis
+      const { response, plan } = await generateFeedback(
+        context, // Le contexte en string
+        coursePlan, // Le plan de cours actuel
+        userMessage.content, // Le message de l'utilisateur
+        messageHistory // L'historique de la conversation en array de strings
+      );
+
+      // Création du message de réponse de l'IA
+      const aiMessage: Message & { showPlan?: boolean } = {
+        id: Date.now().toString(),
+        sender: "ai",
+        content: response,
+        timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" }),
+        // Indiquer si le plan doit être affiché avec ce message
+        showPlan: plan !== null
+      };
+
+      // Ajout du message de l'IA à la conversation
+      setMessages(prev => [...prev, aiMessage]);
+
+      // Mise à jour du plan de cours si nécessaire
+      if (plan !== null) {
+        setCoursePlan(plan);
+        // Sauvegarde du nouveau plan dans le localStorage
+        saveToLocalStorage("coursePlan", plan);
+      }
+
       if (onSubmit) {
         await onSubmit(userMessage.content);
       }
     } catch (error) {
-      console.error("Error modifying course:", error);
+      console.error("Error processing message:", error);
+      
+      // Message d'erreur pour l'utilisateur
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        sender: "ai",
+        content: "Désolé, une erreur s'est produite lors du traitement de votre message. Veuillez réessayer.",
+        timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -130,7 +197,6 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
     }
   };
 
-
   return (
     <motion.div
       className="w-full h-[calc(100vh-4rem)] flex flex-col"
@@ -143,14 +209,24 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
           <div className="space-y-4">
             <AnimatePresence mode="popLayout">
               {messages.map(message => (
-                <ChatMessage key={message.id} message={message} coursePlan={coursePlan} />
+                <ChatMessage 
+                  key={message.id} 
+                  message={message} 
+                  coursePlan={coursePlan}
+                  showPlan={(message as Message & { showPlan?: boolean }).showPlan} 
+                />
               ))}
             </AnimatePresence>
             {isLoading && (
-              <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground">
+              <motion.div 
+                className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                <span>En réflexion...</span>
-              </div>
+                <span>L'IA réfléchit à votre message...</span>
+              </motion.div>
             )}
             <div ref={messagesEndRef} />
           </div>
