@@ -1,11 +1,15 @@
 import json
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from .models import (
-    ContextRequest, PlanRequest, LearningPlan,
-    FeedbackRequest, FeedbackResponse
+    ContextRequest, PlanRequest, LearningPlan, ContentRequest,
+    FeedbackRequest, FeedbackResponse, APIError, LLMParsingError
 )
-from .llm import context_chain, plan_chain, chapters_chain, feedback_chain
+from .llm import (
+    context_chain, plan_chain, chapters_chain, feedback_chain,
+    parse_plan_output, parse_feedback_output
+)
 
 app = FastAPI(
     title="Learning Path Generator API",
@@ -22,6 +26,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Custom error handler
+@app.exception_handler(APIError)
+async def api_error_handler(request, exc: APIError):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "message": exc.message,
+            "details": exc.details
+        }
+    )
+
 @app.post("/api/context", response_model=str)
 async def generate_context_question(request: ContextRequest) -> str:
     """Generate a context question based on the learning subject."""
@@ -29,44 +44,85 @@ async def generate_context_question(request: ContextRequest) -> str:
         result = await context_chain.ainvoke({"subject": request.subject})
         return result.content
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Failed to generate context question",
+                "error": str(e)
+            }
+        )
 
-@app.post("/api/generate_content", response_model=LearningPlan)
-async def generate_content(request: PlanRequest) -> LearningPlan:
-    """Generate a complete learning path including plan and detailed chapter contents.
-    
-    This endpoint combines plan generation and chapter content generation into a single call.
-    It will:
-    1. Generate the learning plan structure based on the subject and context
-    2. Generate detailed content for each chapter in the plan
-    3. Return the complete learning plan with all chapter contents
-    """
+@app.post("/api/plan", response_model=LearningPlan)
+async def generate_learning_plan(request: PlanRequest) -> LearningPlan:
+    """Generate a learning plan based on subject and context."""
     try:
-        # Step 1: Generate learning plan
-        plan_result = await plan_chain.ainvoke({
+        # Generate learning plan
+        result = await plan_chain.ainvoke({
             "sujet": request.subject,
             "context": request.context
         })
-        plan = LearningPlan.model_validate(json.loads(plan_result.content))
-        
-        # Step 2: Generate all chapter contents in a single batch
-        chapters_result = await chapters_chain.ainvoke({
-            "learning_plan": json.dumps(plan.model_dump(), ensure_ascii=False)
-        })
-        chapters_content = json.loads(chapters_result.content)
-        
-        # Step 3: Update each chapter with its content
-        for chapter in plan.chapters:
-            matching_content = next(
-                (c for c in chapters_content["chapters"] if c["id"] == chapter.id),
-                None
-            )
-            if matching_content:
-                chapter.content = matching_content["content"]
-        
-        return plan
+        return parse_plan_output(result)
+    except LLMParsingError as e:
+        raise APIError(
+            message="Failed to generate a valid learning plan",
+            details={
+                "error": str(e),
+                "parsing_error": e.details
+            }
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Unexpected error generating learning plan",
+                "error": str(e)
+            }
+        )
+
+@app.post("/api/generate_content", response_model=LearningPlan)
+async def generate_content(request: ContentRequest) -> LearningPlan:
+    """Generate detailed content for each chapter in the learning plan.
+    
+    This endpoint takes an existing learning plan and generates detailed content
+    for each chapter in the plan.
+    
+    Example request:
+    {
+        "plan": {
+            "title": "Docker Basics",
+            "description": "Learn Docker fundamentals",
+            "chapters": [
+                {
+                    "id": "c1",
+                    "title": "Introduction",
+                    "prerequisites": []
+                }
+            ]
+        }
+    }
+    """
+    try:
+        # Generate all chapter contents
+        result = await chapters_chain.ainvoke({
+            "learning_plan": json.dumps(request.plan.model_dump(), ensure_ascii=False)
+        })
+        return parse_plan_output(result)
+    except LLMParsingError as e:
+        raise APIError(
+            message="Failed to generate valid chapter contents",
+            details={
+                "error": str(e),
+                "parsing_error": e.details
+            }
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Unexpected error generating chapter contents",
+                "error": str(e)
+            }
+        )
 
 @app.post("/api/feedback", response_model=FeedbackResponse)
 async def process_feedback(request: FeedbackRequest) -> FeedbackResponse:
@@ -80,45 +136,30 @@ async def process_feedback(request: FeedbackRequest) -> FeedbackResponse:
     The response will include the assistant's message and optionally a modified plan.
     """
     try:
-        # Get feedback from LLM
+        # Get feedback
         result = await feedback_chain.ainvoke({
             "context": request.context,
             "current_plan": json.dumps(request.current_plan.model_dump(), ensure_ascii=False),
             "user_message": request.user_message,
             "conversation_history": "\n".join(request.conversation_history)
         })
-        
-        # Extract content and remove any extra whitespace/newlines
-        content = result.content.strip()
-        
-        # Try to extract JSON from markdown code blocks if present
-        if "```" in content:
-            # Find the last JSON block (in case there are multiple)
-            json_blocks = content.split("```")
-            for block in reversed(json_blocks):
-                if block.strip().startswith("json"):
-                    content = block.replace("json", "", 1).strip()
-                    break
-                elif not block.strip():
-                    continue
-                else:
-                    content = block.strip()
-                    break
-        
-        try:
-            # Parse the response
-            feedback = json.loads(content)
-            response = feedback["response"]
-            new_plan = feedback.get("plan")
-            
-            # Convert new_plan to LearningPlan if it exists
-            if new_plan:
-                new_plan = LearningPlan.model_validate(new_plan)
-            
-            return FeedbackResponse(response=response, plan=new_plan)
-        except json.JSONDecodeError as e:
-            # If JSON parsing fails, return the raw content as response
-            return FeedbackResponse(response=content, plan=None)
-            
+        return parse_feedback_output(result)
+    except LLMParsingError as e:
+        # If parsing fails but we have a response message, return it
+        if "output" in e.details:
+            return FeedbackResponse(response=e.details["output"].strip(), plan=None)
+        raise APIError(
+            message="Failed to process feedback",
+            details={
+                "error": str(e),
+                "parsing_error": e.details
+            }
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Unexpected error processing feedback",
+                "error": str(e)
+            }
+        )

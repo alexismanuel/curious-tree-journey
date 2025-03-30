@@ -1,32 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, CheckCircle, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { TreeData, Node } from "@/types/tree";
 import { TreeVisualization } from "./TreeVisualization";
 import { ConversationPanel } from "./ConversationPanel";
+import { LoadingBarChapter } from "../ui/LoadingBarChapter";
+import { sendCreateCourse } from "@/api/webhook";
+import { saveToLocalStorage, getFromLocalStorage} from "@/utils/localStorage";
+import { get } from "http";
 
-const ProgressIndicator = ({ completed, total }: { completed: number; total: number }) => (
-  <div className="flex items-center gap-4">
-    <Progress value={(completed / total) * 100} className="flex-1" />
-    <span className="text-sm text-muted-foreground">
-      {completed}/{total} completed
-    </span>
-  </div>
-);
-
-export const PathView = ({ learningGoal, treeData: initialTreeData }: { learningGoal: string; treeData: TreeData }) => {
+export const PathView = ({
+  learningGoal,
+  treeData: initialTreeData
+}: {
+  learningGoal: string;
+  treeData: TreeData;
+}) => {
   const [treeData, setTreeData] = useState<TreeData>(initialTreeData);
   const [activeNode, setActiveNode] = useState<Node | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Calculate progress
+  // Calcul de la progression
   const totalNodes = treeData.nodes.length;
   const completedNodes = treeData.nodes.filter(node => node.status === "completed").length;
 
   const handleNodeSelect = (node: Node) => {
-    // Find the latest version of the node from treeData
     const latestNode = treeData.nodes.find(n => n.id === node.id);
     if (!latestNode) return;
 
@@ -48,14 +48,12 @@ export const PathView = ({ learningGoal, treeData: initialTreeData }: { learning
       if (node.id === activeNode.id) {
         return { ...node, status: "completed" as const };
       }
-      // Unlock children of completed node
       if (activeNode.children.some(child => child.id === node.id)) {
         return { ...node, status: node.status === "locked" ? "upcoming" as const : node.status };
       }
       return node;
     });
 
-    // Update the tree data with new nodes
     setTreeData({
       ...treeData,
       nodes: updatedNodes,
@@ -68,12 +66,36 @@ export const PathView = ({ learningGoal, treeData: initialTreeData }: { learning
     });
   };
 
+  // Nouveau : création du cours dès le montage du composant
+  useEffect(() => {
+    const initCourse = async () => {
+      setIsLoading(true);
+      try {
+        // Ici, il faut disposer d'une réponse initiale.
+        // Vous pouvez définir "initialResponse" selon votre logique.
+        const planJSON = getFromLocalStorage("coursePlan", null);
+        const courseData = await sendCreateCourse(planJSON);
+        saveToLocalStorage("courseData", courseData);
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: "Erreur lors de la création du cours",
+          description: "Une erreur s'est produite lors de la sauvegarde des données.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    initCourse();
+  }, [toast]);
+
   return (
     <div className="h-full min-h-[600px] w-full">
       <div className="h-full mx-auto flex flex-col">
-		 <header>
-		  <h1 className="text-xl font-semibold text-center">{learningGoal}</h1>
-		 </header>
+        <header>
+          <h1 className="text-xl font-semibold text-center">{learningGoal}</h1>
+        </header>
         <div className="flex-1 p-4 max-w-[2000px] mx-auto w-full relative">
           <AnimatePresence mode="wait">
             {!activeNode ? (
@@ -98,7 +120,6 @@ export const PathView = ({ learningGoal, treeData: initialTreeData }: { learning
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-
                 <ConversationPanel
                   key={activeNode.id}
                   node={activeNode}
@@ -112,6 +133,7 @@ export const PathView = ({ learningGoal, treeData: initialTreeData }: { learning
             )}
           </AnimatePresence>
         </div>
+        {isLoading && <LoadingBarChapter />}
       </div>
     </div>
   );

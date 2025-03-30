@@ -37,7 +37,6 @@ const Index = () => {
       const courseData = await sendCreateCourse(response);
       saveToLocalStorage("courseData", courseData);
       console.log("Course Data:", courseData);
-
       // Generate a tree locally without persisting
       const initialTree = generateTreeFromCourseData(response);
       setTreeData(initialTree);
