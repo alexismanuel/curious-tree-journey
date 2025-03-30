@@ -11,7 +11,13 @@ import re
 # Initialize the Mistral LLM
 llm = ChatMistralAI(
     mistral_api_key=os.environ.get("MISTRAL_API_KEY"),
-    temperature=0.7
+    temperature=0.7,
+    max_tokens=4000,  # Ensure enough tokens for complete responses
+    model_kwargs={
+        "stop": None,  # Don't stop generation early
+        "frequency_penalty": 0.0,  # Reduce repetition
+        "presence_penalty": 0.0  # Maintain focus
+    }
 )
 
 # Get paths to prompt files
@@ -90,24 +96,88 @@ def parse_llm_output(output: str) -> str:
     # If all else fails, return the original content
     return content
 
+def parse_text_content(text: str) -> Dict[str, Any]:
+    """Parse text-based content with XML-like tags into a structured format."""
+    print("Parsing text content...")
+    chapters = []
+    current_chapter = None
+    current_section = None
+    section_content = []
+    resources = []
+
+    # Expected sections in order
+    sections = ['introduction', 'theory', 'guided_practice', 'challenge', 'conclusion', 'resources']
+    section_map = {s: {'start': f'<{s}>', 'end': f'</{s}>'} for s in sections}
+
+    # Split text into chapters (if multiple)
+    chapter_texts = text.split('---')
+    
+    for chapter_text in chapter_texts:
+        if not chapter_text.strip():
+            continue
+
+        # Initialize chapter content
+        chapter_content = {}
+        current_section = None
+        section_content = []
+        resources = []
+
+        # Process each line
+        lines = chapter_text.split('\n')
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            if not line:
+                i += 1
+                continue
+
+            # Check if line starts a new section
+            for section, tags in section_map.items():
+                if line.startswith(tags['start']):
+                    # Extract content until closing tag
+                    content = [line[len(tags['start']):].strip()]
+                    j = i + 1
+                    while j < len(lines) and not lines[j].strip().startswith(tags['end']):
+                        content.append(lines[j].strip())
+                        j += 1
+                    
+                    # Store the content
+                    if section == 'resources':
+                        # Parse resource links
+                        chapter_content[section] = [
+                            link.strip('- ') for link in content
+                            if link.strip('- ')
+                        ]
+                    else:
+                        chapter_content[section] = '\n'.join(content).strip()
+                    
+                    i = j + 1  # Skip to after closing tag
+                    break
+            else:
+                i += 1
+
+        # Add chapter to result if it has content
+        if chapter_content:
+            chapters.append({
+                'id': 'c1',  # We'll update this in the main function
+                'content': chapter_content
+            })
+
+    return {'chapters': chapters}
+
 def try_parse_json(content: str) -> Dict[str, Any]:
-    """Try to parse JSON with repair attempts."""
+    """Try to parse content as JSON first, then fall back to text parsing."""
     try:
+        print("Attempting direct JSON parse...")
         return json.loads(content)
-    except json.JSONDecodeError:
-        # First repair attempt
+    except json.JSONDecodeError as e1:
+        print(f"Direct parse failed: {str(e1)}")
+        print("Attempting text-based parsing...")
         try:
-            repaired = repair_json(content)
-            return json.loads(repaired)
-        except json.JSONDecodeError as e:
-            # If repair fails, try to extract any valid JSON substring
-            matches = re.finditer(r'\{(?:[^{}]|\{[^{}]*\})*\}', content)
-            for match in matches:
-                try:
-                    return json.loads(match.group())
-                except json.JSONDecodeError:
-                    continue
-            raise e
+            return parse_text_content(content)
+        except Exception as e2:
+            print(f"Text parsing failed: {str(e2)}")
+            raise e1
 
 def parse_plan_output(result) -> LearningPlan:
     """Parse LLM output into a LearningPlan object."""

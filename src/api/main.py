@@ -126,8 +126,14 @@ async def generate_content(request: ContentRequest) -> LearningPlan:
             "learning_plan": json.dumps(request.plan.model_dump(), ensure_ascii=False)
         })
         
+        # Debug: Print raw LLM output
+        print("Raw LLM output:")
+        print(result.content)
+        
         # Extract and parse the JSON content
         content = parse_llm_output(result.content)
+        print("\nParsed content:")
+        print(content)
         try:
             data = try_parse_json(content)
             
@@ -141,26 +147,44 @@ async def generate_content(request: ContentRequest) -> LearningPlan:
             # Create a map of chapter IDs to their indices for faster lookup
             chapter_map = {chapter.id: i for i, chapter in enumerate(updated_plan.chapters)}
             
+            # Get the original chapter IDs in order
+            chapter_ids = [c.id for c in request.plan.chapters]
+            
             # Process each chapter's content
-            for chapter_data in data['chapters']:
+            for i, chapter_data in enumerate(data['chapters']):
                 # Validate chapter data structure
                 if not isinstance(chapter_data, dict):
+                    print(f"Invalid chapter data type: {type(chapter_data)}")
                     continue
                     
-                chapter_id = chapter_data.get('id')
                 chapter_content = chapter_data.get('content')
-                
-                if not chapter_id or not chapter_content:
+                if not chapter_content:
+                    print(f"Missing content for chapter")
                     continue
-                    
+                
+                # Map the chapter to the correct ID from the plan
+                if i < len(chapter_ids):
+                    chapter_id = chapter_ids[i]
+                    chapter_data['id'] = chapter_id
+                else:
+                    print(f"Extra chapter content ignored")
+                    continue
+                
+                print(f"\nProcessing chapter {chapter_id}")
+                print("Content:", json.dumps(chapter_content, indent=2))
+                
                 # Find and update the chapter if it exists in our plan
                 if chapter_id in chapter_map:
                     try:
+                        print(f"Validating content against ChapterContent model...")
                         validated_content = ChapterContent.model_validate(chapter_content)
+                        print("Content validation successful")
                         updated_plan.chapters[chapter_map[chapter_id]].content = validated_content
                     except Exception as e:
                         print(f"Error validating content for chapter {chapter_id}: {str(e)}")
                         raise ValueError(f"Invalid content structure for chapter {chapter_id}: {str(e)}")
+                else:
+                    print(f"Chapter {chapter_id} not found in plan")
             
             return updated_plan
             
