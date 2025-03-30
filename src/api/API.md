@@ -35,11 +35,11 @@ Content-Type: application/json
 Response: string (the context question)
 ```
 
-### 2. Generate Complete Learning Path
-Generates a complete learning path with detailed chapter contents in one call.
+### 2. Generate Learning Plan
+Generates a structured learning plan based on subject and context.
 
 ```http
-POST /api/generate_content
+POST /api/plan
 Content-Type: application/json
 
 {
@@ -47,13 +47,22 @@ Content-Type: application/json
     "context": "string"   // Your learning context
 }
 
-Response: Complete LearningPlan object with detailed chapter contents
+Response: LearningPlan object
 ```
 
-This endpoint combines plan generation and chapter content generation into a single call. It will:
-1. Generate the learning plan structure based on the subject and context
-2. Generate detailed content for each chapter in the plan
-3. Return the complete learning plan with all chapter contents
+### 3. Generate Chapter Contents
+Generates detailed content for each chapter in a learning plan.
+
+```http
+POST /api/generate_content
+Content-Type: application/json
+
+{
+    // LearningPlan object from /api/plan endpoint
+}
+
+Response: LearningPlan object with detailed chapter contents
+```
 
 ### 3. Process Feedback
 Enables conversational interaction with the learning plan. Users can ask questions, request modifications, or get clarification about any aspect of the plan.

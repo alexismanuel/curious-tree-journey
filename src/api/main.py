@@ -31,31 +31,34 @@ async def generate_context_question(request: ContextRequest) -> str:
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/generate_content", response_model=LearningPlan)
-async def generate_content(request: PlanRequest) -> LearningPlan:
-    """Generate a complete learning path including plan and detailed chapter contents.
-    
-    This endpoint combines plan generation and chapter content generation into a single call.
-    It will:
-    1. Generate the learning plan structure based on the subject and context
-    2. Generate detailed content for each chapter in the plan
-    3. Return the complete learning plan with all chapter contents
-    """
+@app.post("/api/plan", response_model=LearningPlan)
+async def generate_learning_plan(request: PlanRequest) -> LearningPlan:
+    """Generate a learning plan based on subject and context."""
     try:
-        # Step 1: Generate learning plan
+        # Generate learning plan
         plan_result = await plan_chain.ainvoke({
             "sujet": request.subject,
             "context": request.context
         })
-        plan = LearningPlan.model_validate(json.loads(plan_result.content))
-        
-        # Step 2: Generate all chapter contents in a single batch
+        return LearningPlan.model_validate(json.loads(plan_result.content))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/generate_content", response_model=LearningPlan)
+async def generate_content(plan: LearningPlan) -> LearningPlan:
+    """Generate detailed content for each chapter in the learning plan.
+    
+    This endpoint takes an existing learning plan and generates detailed content
+    for each chapter in the plan.
+    """
+    try:
+        # Generate all chapter contents in a single batch
         chapters_result = await chapters_chain.ainvoke({
             "learning_plan": json.dumps(plan.model_dump(), ensure_ascii=False)
         })
         chapters_content = json.loads(chapters_result.content)
         
-        # Step 3: Update each chapter with its content
+        # Update each chapter with its content
         for chapter in plan.chapters:
             matching_content = next(
                 (c for c in chapters_content["chapters"] if c["id"] == chapter.id),
