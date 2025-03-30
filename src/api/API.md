@@ -58,7 +58,17 @@ POST /api/generate_content
 Content-Type: application/json
 
 {
-    // LearningPlan object from /api/plan endpoint
+    "plan": {                       // LearningPlan object
+        "title": "string",
+        "description": "string",
+        "chapters": [
+            {
+                "id": "string",
+                "title": "string",
+                "prerequisites": ["string"],
+            }
+        ]
+    }
 }
 
 Response: LearningPlan object with detailed chapter contents
@@ -83,6 +93,28 @@ Content-Type: application/json
 Response: {
     "response": "string",            // Assistant's response
     "plan": LearningPlan | null      // Modified plan or null if no changes
+}
+```
+
+## Error Handling
+
+The API uses HTTP status codes to indicate the success or failure of requests:
+
+- `200 OK`: Request successful
+- `422 Unprocessable Entity`: Invalid request format or LLM output parsing error
+- `500 Internal Server Error`: Server-side error
+
+### Error Response Format
+
+```json
+{
+    "message": "string",           // Error description
+    "details": {                   // Optional error details
+        "error": "string",        // Technical error message
+        "parsing_error": {        // For LLM parsing errors
+            "output": "string"    // Raw LLM output
+        }
+    }
 }
 ```
 
