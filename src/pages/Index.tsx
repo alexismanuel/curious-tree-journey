@@ -101,7 +101,7 @@ const Index = () => {
         {stage === "creation" && <LearningPathCreation onCreatePath={handleCreatePath} />}
         {stage === "personalization" && <PersonalizationForm goal={learningGoal} onboardMsg={onboardingData} onSubmit={handlePersonalization} />}
         {stage === "pathEdition" && treeData && <EditConversation treeData={treeData} onSubmit={handlePathChanges} onStart={handlePathEditionSubmit} />}
-        {stage === "loading" && <LoadingBar message={loadingMessage} width={350} />}
+        {stage === "loading" && <LoadingBar message={loadingMessage} width={300} />}
         {stage === "tree" && <PathView learningGoal={learningGoal} treeData={treeData} />}
       </motion.div>
     </div>

@@ -106,8 +106,8 @@ const LoadingBar = ({
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 ">
-      <div className="mb-4 text-lg font-medium text-black">{message}</div>
+    <div className="flex flex-col items-center mx-4 justify-center p-6 my-[30%]">
+      <div className="mb-4 ml-8 text-lg font-medium text-black">{message}</div>
 
       <div
         className="relative overflow-hidden rounded-full"
