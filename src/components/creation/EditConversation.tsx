@@ -37,7 +37,7 @@ const ChatMessage = forwardRef<HTMLDivElement, { message: Message; coursePlan?: 
   return (
     <motion.div
       ref={ref}
-      className={`flex gap-3 mx-2 top-[2%] ${isAI ? "" : "flex-row-reverse"}`}
+      className={`flex gap-3 mx-2 mt-[15%] ${isAI ? "" : "flex-row-reverse"}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
