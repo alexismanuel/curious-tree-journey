@@ -37,7 +37,7 @@ const ChatMessage = forwardRef<HTMLDivElement, { message: Message; coursePlan?: 
   return (
     <motion.div
       ref={ref}
-      className={`flex gap-3 mx-2 mt-[15%] ${isAI ? "" : "flex-row-reverse"}`}
+      className={`flex gap-3 mx-2 mt-[10%] ${isAI ? "" : "flex-row-reverse"}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
@@ -233,7 +233,7 @@ export const EditConversation = ({ treeData, onStart, onSubmit }: EditConversati
 		  </div>
 
       </div>
-          <div className="flex justify-end absolute bottom-[14%] right-5 mr-4 pt-8">
+          <div className="flex justify-end absolute bottom-[16%] right-5 mr-4 pt-8">
             <Button
               onClick={handleStart}
               className="bg-black text-white hover:bg-black/90 px-6"
