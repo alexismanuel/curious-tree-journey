@@ -55,6 +55,7 @@ async function sendCreateCourse(plan: LearningPlan): Promise<any> {
     try {
         const response = await fetch('https://curious-tree-journey.onrender.com/api/generate_content', {
             method: 'POST',
+            mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             },
