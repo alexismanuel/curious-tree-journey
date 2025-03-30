@@ -18,12 +18,12 @@ Une **seule phrase** courte, engageante, avec des emojis.
 
 💡 Exemples :
 - Sujet : “Apprendre la guitare” →  
-  "Tu peux par exemple dire ton niveau 🎸, ton style préféré 🎶 ou une chanson 🎵."
+  Tu peux par exemple dire ton niveau 🎸, ton style préféré 🎶 ou une chanson 🎵.
 
 - Sujet : “Python pour l’analyse de données” →  
-  "Tu peux par exemple dire ton niveau 🧠, ton objectif 📊 et ton temps dispo ⏱️."
+  Tu peux par exemple dire ton niveau 🧠, ton objectif 📊 et ton temps dispo ⏱️.
 
 - Sujet : “Créer un site web” →  
-  "Tu peux par exemple dire si tu débutes 👶, ton projet 💡 ou ton temps dispo ⏳."
+  Tu peux par exemple dire si tu débutes 👶, ton projet 💡 ou ton temps dispo ⏳.
 
 Pas de texte autour. Seulement la phrase.
