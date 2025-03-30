@@ -96,6 +96,46 @@ Response: {
 }
 ```
 
+### 4. Chat with Assistant
+Enables interactive conversation with the learning assistant about the current topic.
+
+```http
+POST /api/chat
+Content-Type: application/json
+
+{
+    "plan": {                       // LearningPlan object
+        "title": "string",
+        "description": "string",
+        "chapters": [
+            {
+                "id": "string",
+                "title": "string",
+                "prerequisites": ["string"]
+            }
+        ]
+    },
+    "current_chapter": "string",    // ID of the current chapter
+    "conversation_history": [       // Previous messages
+        {
+            "role": "string",      // "USER" or "ASSISTANT"
+            "content": "string"    // Message content
+        }
+    ],
+    "message": "string"            // Current user message
+}
+
+Response: {
+    "response": "string",          // Assistant's response
+    "conversation_history": [      // Updated conversation history
+        {
+            "role": "string",
+            "content": "string"
+        }
+    ]
+}
+```
+
 ## Error Handling
 
 The API uses HTTP status codes to indicate the success or failure of requests:

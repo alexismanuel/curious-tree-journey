@@ -63,3 +63,54 @@ class ContentRequest(BaseModel):
 class FeedbackResponse(BaseModel):
     response: str = Field(..., description="Assistant's response to the user")
     plan: Optional[LearningPlan] = Field(None, description="Modified learning plan, if any")
+
+class Message(BaseModel):
+    """A message in the conversation history"""
+    role: str = Field(..., description="Role of the message sender (USER or ASSISTANT)")
+    content: str = Field(..., description="Content of the message")
+
+class ChatRequest(BaseModel):
+    """Request model for chat endpoint."""
+    plan: LearningPlan = Field(..., description="Complete learning plan without chapter content")
+    current_chapter: str = Field(..., description="ID of the current chapter")
+    conversation_history: List[Message] = Field(default_factory=list, description="Previous conversation messages")
+    message: str = Field(..., description="User's message to respond to")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "plan": {
+                    "title": "Docker Basics",
+                    "description": "Learn Docker fundamentals",
+                    "chapters": [
+                        {
+                            "id": "c1",
+                            "title": "Introduction to Docker",
+                            "prerequisites": []
+                        },
+                        {
+                            "id": "c2",
+                            "title": "Docker Installation",
+                            "prerequisites": ["c1"]
+                        },
+                        {
+                            "id": "c3",
+                            "title": "Docker Images and Containers",
+                            "prerequisites": ["c2"]
+                        }
+                    ]
+                },
+                "current_chapter": "c2",
+                "conversation_history": [
+                    {"role": "ASSISTANT", "content": "Docker can be installed on various operating systems..."},
+                    {"role": "USER", "content": "Ok but I didn't get the third fact"},
+                    {"role": "ASSISTANT", "content": "The third fact was about..."}
+                ],
+                "message": "How do I check if Docker is installed correctly?"
+            }
+        }
+
+class ChatResponse(BaseModel):
+    """Response model for chat endpoint."""
+    response: str = Field(..., description="Assistant's response to the user")
+    conversation_history: List[Message] = Field(..., description="Updated conversation history")

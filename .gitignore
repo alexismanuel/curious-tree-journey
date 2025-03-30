@@ -30,3 +30,7 @@ final_output.json
 src/api/__pycache__/
 
 test_request.json
+
+src/prompts/__pycache__/
+
+src/scripts/__pycache__/
