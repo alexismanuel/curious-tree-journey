@@ -33,7 +33,7 @@ export const CustomEdge = ({
       d={path}
       style={{
         ...style,
-        stroke: '#000',
+        stroke: 'currentColor',
         strokeWidth: 2,
         strokeDasharray: '5,5',
         opacity: 0.5,

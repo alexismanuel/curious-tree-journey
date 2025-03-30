@@ -54,29 +54,68 @@ Response: LearningPlan object
 Generates detailed content for each chapter in a learning plan.
 
 ```http
-POST /api/chapters
+POST /api/generate_content
 Content-Type: application/json
 
 {
-    // LearningPlan object
+    "plan": {                       // LearningPlan object
+        "title": "string",
+        "description": "string",
+        "chapters": [
+            {
+                "id": "string",
+                "title": "string",
+                "prerequisites": ["string"],
+            }
+        ]
+    }
 }
 
-Response: LearningPlan object with chapter contents
+Response: LearningPlan object with detailed chapter contents
 ```
 
-### 4. Generate Complete Learning Path
-Complete pipeline that generates everything in one call.
+### 3. Process Feedback
+Enables conversational interaction with the learning plan. Users can ask questions, request modifications, or get clarification about any aspect of the plan.
 
 ```http
-POST /api/generate
+POST /api/feedback
 Content-Type: application/json
 
 {
-    "subject": "string",  // What you want to learn
-    "context": "string"   // Your learning context
+    "context": "string",              // Original learning context
+    "current_plan": LearningPlan,     // Current learning plan
+    "user_message": "string",        // User's feedback or question
+    "conversation_history": [         // Optional list of previous messages
+        "string"
+    ]
 }
 
-Response: Complete LearningPlan object with chapters
+Response: {
+    "response": "string",            // Assistant's response
+    "plan": LearningPlan | null      // Modified plan or null if no changes
+}
+```
+
+## Error Handling
+
+The API uses HTTP status codes to indicate the success or failure of requests:
+
+- `200 OK`: Request successful
+- `422 Unprocessable Entity`: Invalid request format or LLM output parsing error
+- `500 Internal Server Error`: Server-side error
+
+### Error Response Format
+
+```json
+{
+    "message": "string",           // Error description
+    "details": {                   // Optional error details
+        "error": "string",        // Technical error message
+        "parsing_error": {        // For LLM parsing errors
+            "output": "string"    // Raw LLM output
+        }
+    }
+}
 ```
 
 ## Response Models
@@ -84,10 +123,8 @@ Response: Complete LearningPlan object with chapters
 ### LearningPlan
 ```json
 {
-    "id": "string",
     "title": "string",
     "description": "string",
-    "context": "string",
     "chapters": [
         {
             "id": "string",

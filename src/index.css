@@ -8,7 +8,6 @@ html, body {
   background-color: #F8F9FA;
   margin: 0;
   padding: 0;
-  min-height: 100vh;
 }
 
 /* Root styles */
@@ -47,12 +46,12 @@ html, body {
   .node {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
-  
+
   .node svg {
     width: 24px;
     height: 24px;
   }
-  
+
   .node span {
     font-size: 0.875rem;
   }
@@ -126,7 +125,7 @@ html, body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -134,31 +133,31 @@ html, body {
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
- 
+
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
- 
+
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
- 
+
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
- 
+
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
- 
+
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
- 
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
- 
+
     --radius: 0.5rem;
-    
+
     /* Custom theme colors */
     --leaf-50: 156 43% 95%;
     --leaf-100: 156 43% 90%;
@@ -170,7 +169,7 @@ html, body {
     --leaf-700: 156 40% 33%;
     --leaf-800: 156 42% 23%;
     --leaf-900: 156 44% 13%;
-    
+
     --bark-50: 35 43% 95%;
     --bark-100: 35 38% 90%;
     --bark-200: 35 30% 80%;
@@ -181,7 +180,7 @@ html, body {
     --bark-700: 35 22% 25%;
     --bark-800: 35 25% 15%;
     --bark-900: 35 30% 5%;
-    
+
     --blossom-50: 340 100% 97%;
     --blossom-100: 340 90% 94%;
     --blossom-200: 340 80% 90%;
@@ -193,38 +192,38 @@ html, body {
     --blossom-800: 340 90% 35%;
     --blossom-900: 340 100% 25%;
   }
- 
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
- 
+
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
- 
+
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
- 
+
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
- 
+
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
- 
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
- 
+
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
- 
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
- 
+
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
