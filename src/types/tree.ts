@@ -1,3 +1,9 @@
+export interface ChapterContent {
+  explanation?: string;
+  tips?: string;
+  resources?: string[];
+}
+
 export interface Node {
   id: string;
   title: string;
@@ -5,7 +11,7 @@ export interface Node {
   status: "active" | "completed" | "upcoming" | "locked";
   children: Node[];
   tags?: string[];
-  content?: string;
+  content?: ChapterContent;
   prerequisites?: string[];
 }
 

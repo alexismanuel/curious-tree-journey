@@ -14,39 +14,58 @@ export const generateInitialMessages = (node: Node): Message[] => {
       {
         id: "1",
         sender: "ai",
-        content: `Vous avez déjà maitriser "${node.title}". Voulez-vous revoir des points ?`,
+        content: `Vous avez déjà maîtrisé "${node.title}". Voulez-vous revoir des points ?`,
         timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
       }
     ];
   }
 
-  // Default welcome message based on node topic
-  return [
-    {
-      id: "1",
+  // Initialize messages with content attributes
+  const messages: Message[] = [];
+  
+  // Add explanation message if available
+  if (node.content?.explanation) {
+    messages.push({
+      id: "explanation",
       sender: "ai",
-      content: `Bienvenue dans le chapitre "${node.title}"! ${node.description}. Je vais vous aider tout au long de votre apprentissage. N'hésitez pas à poser des questions ou à demander des clarifications sur les sujets abordés. Voici les premiéres ressources pour commencer votre apprentissage : `,
+      content: node.content.explanation,
       timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
-    },
-    {
-      id: "2",
+    });
+  }
+
+  // Add tips message if available
+  if (node.content?.tips) {
+    messages.push({
+      id: "tips",
       sender: "ai",
-      content: `Voici le contenu du chapitre : ${chapterContent}`,
+      content: `💡 Conseils :\n${node.content.tips}`,
       timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
-    }
-  ];
+    });
+  }
+
+  // Add resources message if available
+  if (node.content?.resources?.length > 0) {
+    messages.push({
+      id: "resources",
+      sender: "ai",
+      content: `📚 Ressources :\n${node.content.resources.join('\n')}`,
+      timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
+    });
+  }
+
+  return messages;
 };
 
-export const generateInitialEditMessage = (): Message => {
+export const generateInitialEditMessage = (node: Node): Message => {
   const DataChapter = getFromLocalStorage("courseData", null);
-  const chapterTitles = DataChapter.chapitres.map((c)=> c.title);
+  const chapterTitles = DataChapter?.chapitres?.map((c)=> c.title) || [];
   console.log("Chapter Title:", chapterTitles);
 
   // Default welcome message based on node topic
   return {
       id: "1",
       sender: "ai",
-      content: `Bienvenue dans le chapitre "${node.title}"! ${node.description}. Je vais vous aider tout au long de votre apprentissage. N'hésitez pas à poser des questions ou à demander des clarifications sur les sujets abordés. Voici les premiéres ressources pour commencer votre apprentissage : `,
+      content: `Bienvenue dans le chapitre "${node.title}"! ${node.description}. Je vais vous aider tout au long de votre apprentissage. N'hésitez pas à poser des questions ou à demander des clarifications sur les sujets abordés.`,
       timestamp: new Date().toLocaleString([], { dateStyle: "short", timeStyle: "short" })
   }
 };

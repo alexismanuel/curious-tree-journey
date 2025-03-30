@@ -66,7 +66,7 @@ const LearningPathCreation = ({ onCreatePath }: LearningPathCreationProps) => {
 			value={goal}
 			onChange={(e) => setGoal(e.target.value)}
 			onFocus={scrollToBottom}
-			placeholder="Je veux apprendre..."
+			placeholder="Je veux apprendre le marketing digital ..."
 			className="h-14 px-4 text-lg pr-12 border-2 focus-visible:ring-0 focus-visible:border-gray-400"
 		  />
 		  <Button
