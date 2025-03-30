@@ -1,6 +1,6 @@
 # Learning Path Generator API
 
-API service that generates personalized learning paths using LLMs.
+API service that generates personalized learning paths using LLMs. All responses are in French.
 
 ## Quick Start
 
@@ -32,7 +32,7 @@ Content-Type: application/json
     "subject": "string"  // What you want to learn
 }
 
-Response: string (the context question)
+Response: string (the context question in French)
 ```
 
 ### 2. Generate Learning Plan
@@ -71,7 +71,7 @@ Content-Type: application/json
     }
 }
 
-Response: LearningPlan object with detailed chapter contents
+Response: LearningPlan object with detailed chapter contents (all text fields in French)
 ```
 
 ### 3. Process Feedback
@@ -91,7 +91,7 @@ Content-Type: application/json
 }
 
 Response: {
-    "response": "string",            // Assistant's response
+    "response": "string",            // Assistant's response (in French)
     "plan": LearningPlan | null      // Modified plan or null if no changes
 }
 ```
@@ -126,7 +126,7 @@ Content-Type: application/json
 }
 
 Response: {
-    "response": "string",          // Assistant's response
+    "response": "string",          // Assistant's response (in French)
     "conversation_history": [      // Updated conversation history
         {
             "role": "string",
