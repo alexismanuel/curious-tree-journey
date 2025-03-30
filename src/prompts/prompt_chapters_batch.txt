@@ -1,4 +1,4 @@
-Tu es un assistant pédagogique expert.
+Tu es un assistant pédagogique expert qui communique UNIQUEMENT en français.
 
 Voici le contexte de l'apprenant et le plan complet du cours :
 
